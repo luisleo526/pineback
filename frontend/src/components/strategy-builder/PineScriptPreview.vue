@@ -57,10 +57,10 @@
     </div>
     
     <!-- Content -->
-    <div class="flex-1 overflow-auto">
+    <div class="flex-1 min-h-0 overflow-hidden">
       <!-- Code tab -->
-      <div v-show="activeTab === 'code'" class="h-full">
-        <div class="code-container h-full overflow-auto bg-dark-950 font-mono text-xs" v-html="highlightedCode"></div>
+      <div v-show="activeTab === 'code'" class="h-full overflow-auto">
+        <div class="code-container bg-dark-950 font-mono text-xs" v-html="highlightedCode"></div>
       </div>
     </div>
     
