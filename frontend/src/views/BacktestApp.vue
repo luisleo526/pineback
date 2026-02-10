@@ -110,6 +110,8 @@
       </transition>
     </div>
 
+    <!-- Guided Tour -->
+    <GuidedTour ref="tourRef" @load-template="loadFirstTemplate" />
   </div>
 </template>
 
@@ -118,12 +120,14 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import StrategyBuilderPage from '../components/strategy-builder/StrategyBuilderPage.vue'
 import BacktestConfigPanel from '../components/backtest/BacktestConfigPanel.vue'
 import BacktestJobTracker from '../components/backtest/BacktestJobTracker.vue'
+import GuidedTour from '../components/GuidedTour.vue'
 import { getStrategies } from '../api/index.js'
 
 // ── Refs ──────────────────────────────────────────────────────
 const builderRef = ref(null)
 const jobTrackerRef = ref(null)
 const templateBtnRef = ref(null)
+const tourRef = ref(null)
 const showBacktestPanel = ref(true)
 const showTemplateMenu = ref(false)
 
@@ -206,9 +210,19 @@ function handleRunBacktest(config) {
 }
 
 
-// ── Tutorial (stub — implemented in GuidedTour commit) ────────
+// ── Tutorial ──────────────────────────────────────────────────
 function showTutorial() {
-  console.log('Tutorial requested')
+  if (tourRef.value?.startTour) {
+    tourRef.value.startTour()
+  }
+}
+
+function loadFirstTemplate() {
+  // Called by the tour when it wants to auto-load a template
+  if (templates.value.length > 0) {
+    const macd = templates.value.find(t => t.name.includes('MACD')) || templates.value[0]
+    loadTemplate(macd)
+  }
 }
 
 // Expose for external use (e.g. e2e tests)
