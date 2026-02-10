@@ -125,18 +125,19 @@ class TradeMarkersRenderer {
             ctx.save()
             ctx.fillStyle = color
 
-            // Draw horizontal triangle pointing right for entry, left for exit
+            // Draw horizontal triangle with tip pointing at the bar center (x)
+            const s = size
             ctx.beginPath()
             if (m.isEntry) {
-              // ▶ right-pointing
-              ctx.moveTo(x - size, y - size * 0.7)
-              ctx.lineTo(x + size, y)
-              ctx.lineTo(x - size, y + size * 0.7)
+              // ▶ right-pointing, tip at bar
+              ctx.moveTo(x - s * 2, y - s * 0.7)
+              ctx.lineTo(x,         y)
+              ctx.lineTo(x - s * 2, y + s * 0.7)
             } else {
-              // ◀ left-pointing
-              ctx.moveTo(x + size, y - size * 0.7)
-              ctx.lineTo(x - size, y)
-              ctx.lineTo(x + size, y + size * 0.7)
+              // ◀ left-pointing, tip at bar
+              ctx.moveTo(x + s * 2, y - s * 0.7)
+              ctx.lineTo(x,         y)
+              ctx.lineTo(x + s * 2, y + s * 0.7)
             }
             ctx.closePath()
             ctx.fill()
