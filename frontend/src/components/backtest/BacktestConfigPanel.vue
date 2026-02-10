@@ -114,7 +114,7 @@
     </div>
 
     <!-- Magnifier Toggle -->
-    <div class="flex items-center justify-between py-2">
+    <div id="magnifier-toggle" class="flex items-center justify-between py-2">
       <div>
         <label class="text-xs text-white/70">Magnifier Mode</label>
         <p class="text-[10px] text-white/30 mt-0.5">Realistic intra-bar fill prices</p>
