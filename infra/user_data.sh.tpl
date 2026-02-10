@@ -11,6 +11,7 @@
 #   ${openai_secret_name} — Secrets Manager secret name
 
 set -euo pipefail
+export HOME=/root
 exec > /var/log/user-data.log 2>&1
 echo "=== Bootstrap started at $(date) ==="
 
