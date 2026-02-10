@@ -83,14 +83,48 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { submitBacktest as apiSubmitBacktest, getBacktest } from '../../api/index.js'
+import { submitBacktest as apiSubmitBacktest, getBacktest, listBacktests } from '../../api/index.js'
 
 const router = useRouter()
 const emit = defineEmits(['view-result'])
 
 const jobs = ref([])
+
+// Load previous backtests from API on mount
+onMounted(async () => {
+  try {
+    const history = await listBacktests()
+    for (const item of history) {
+      // Don't duplicate if already in the list (from a submit)
+      if (jobs.value.some(j => j.id === item.id)) continue
+      jobs.value.push(reactive({
+        id: item.id,
+        status: item.status,
+        progress: item.progress || (item.status === 'completed' ? 100 : 0),
+        progress_message: item.progress_message || '',
+        timeframe: item.timeframe,
+        start_date: item.start_date,
+        end_date: item.end_date,
+        strategy_name: item.strategy_name || '',
+        total_return: item.total_return,
+        sharpe_ratio: item.sharpe_ratio,
+        total_trades: item.total_trades,
+        error: item.error_message,
+        result: null, // Don't load full result — fetched on demand via result page
+      }))
+    }
+    // Resume polling for any active jobs
+    for (const job of jobs.value) {
+      if (job.status === 'running' || job.status === 'pending') {
+        pollJob(job)
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load backtest history:', e)
+  }
+})
 
 // Submit a new backtest and start polling
 async function submitBacktest(config) {
