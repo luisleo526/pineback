@@ -114,7 +114,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import StrategyBuilderPage from '../components/strategy-builder/StrategyBuilderPage.vue'
 import BacktestConfigPanel from '../components/backtest/BacktestConfigPanel.vue'
 import BacktestJobTracker from '../components/backtest/BacktestJobTracker.vue'
