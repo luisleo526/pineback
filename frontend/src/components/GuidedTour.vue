@@ -26,7 +26,11 @@ function createTour() {
       modalOverlayOpeningPadding: 12,
       modalOverlayOpeningRadius: 10,
       popperOptions: {
-        modifiers: [{ name: 'offset', options: { offset: [0, 16] } }],
+        modifiers: [
+          { name: 'offset', options: { offset: [0, 16] } },
+          { name: 'preventOverflow', options: { padding: 16 } },
+          { name: 'flip', options: { fallbackPlacements: ['right', 'left', 'top', 'bottom'] } },
+        ],
       },
     },
   })
