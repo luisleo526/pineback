@@ -326,8 +326,8 @@ function runBacktest() {
     start_date: config.startDate,
     end_date: config.endDate,
     initial_capital: config.initialCapital,
-    commission: config.commission,
-    slippage: config.slippage,
+    commission: config.commission / 100,   // UI shows %, API expects fraction
+    slippage: config.slippage / 100,       // UI shows %, API expects fraction
     params,
     mode: config.magnifier ? 'magnifier' : 'standard',
   })

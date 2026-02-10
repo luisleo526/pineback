@@ -29,6 +29,8 @@ class BacktestRequest(BaseModel):
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     initial_capital: float = 10000
+    commission: float = 0.001      # fraction (0.001 = 0.1%)
+    slippage: float = 0.0005       # fraction (0.0005 = 0.05%)
     params: Dict[str, Any] = {}
     mode: str = "magnifier"
     symbol: str = "SPY"
@@ -74,8 +76,11 @@ def execute_backtest_job(job_id: str):
         source = TimescaleSource()
         backtester = Backtester(data_source=source)
 
-        # Merge user param overrides
-        param_overrides = job.params or {}
+        # Extract commission/slippage from params, pass rest as strategy overrides
+        all_params = job.params or {}
+        fees = all_params.pop("_commission", None)
+        slippage = all_params.pop("_slippage", None)
+        param_overrides = all_params
 
         result = backtester.run(
             strategy=strategy,
@@ -86,6 +91,8 @@ def execute_backtest_job(job_id: str):
             timeframe=job.timeframe,
             magnify=(job.mode == "magnifier"),
             initial_capital=float(job.initial_capital),
+            fees=fees,
+            slippage=slippage,
             on_progress=on_progress,
             **param_overrides,
         )
@@ -137,6 +144,11 @@ async def submit_backtest(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"PineScript compile error: {e}")
 
+    # Store commission/slippage inside params with _ prefix (extracted by background job)
+    job_params = dict(req.params)
+    job_params["_commission"] = req.commission
+    job_params["_slippage"] = req.slippage
+
     # Create job row
     job = Backtest(
         strategy_name=strategy.name,
@@ -147,7 +159,7 @@ async def submit_backtest(
         start_date=req.start_date,
         end_date=req.end_date,
         initial_capital=req.initial_capital,
-        params=req.params,
+        params=job_params,
         mode=req.mode,
     )
     db.add(job)
