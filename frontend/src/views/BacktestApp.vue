@@ -159,11 +159,14 @@ onMounted(async () => {
 function loadTemplate(template) {
   showTemplateMenu.value = false
   if (builderRef.value && template.strategy_data) {
-    // StrategyBuilderPage exposes applyStrategyData via defineExpose
     const builder = builderRef.value
     if (builder.applyStrategyData) {
       builder.applyStrategyData(template.strategy_data)
     }
+  }
+  // Advance tour if it's waiting for a template to load
+  if (tourRef.value?.advanceIfActive) {
+    setTimeout(() => tourRef.value.advanceIfActive(), 300)
   }
 }
 
