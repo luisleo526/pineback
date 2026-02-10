@@ -47,8 +47,8 @@ data "aws_subnets" "public" {
 # ── Security Group ───────────────────────────────────────────────
 
 resource "aws_security_group" "backtest" {
-  name_prefix = "backtest-"
-  description = "Backtest system: HTTP, HTTPS, SSH"
+  name_prefix = "pineback-${local.slug}-"
+  description = "PineBack ${local.slug}: HTTP, HTTPS, SSH"
   vpc_id      = data.aws_vpc.selected.id
 
   # HTTP
@@ -91,14 +91,21 @@ resource "aws_security_group" "backtest" {
   }
 }
 
+# ── Naming: derive a unique prefix from the domain ───────────────
+# e.g. "interview.4pass.io" -> "interview", "interview-v2.4pass.io" -> "interview-v2"
+
+locals {
+  slug = split(".", var.domain_name)[0]  # subdomain part
+}
+
 # ── Secrets Manager: OpenAI API key ──────────────────────────────
 
 resource "aws_secretsmanager_secret" "openai" {
-  name        = "pineback/openai-api-key"
-  description = "OpenAI API key for PineBack voice AI agent"
+  name        = "pineback/${local.slug}/openai-api-key"
+  description = "OpenAI API key for PineBack (${var.domain_name})"
 
   tags = {
-    Name = "pineback-openai-key"
+    Name = "pineback-${local.slug}-openai-key"
   }
 }
 
@@ -110,7 +117,7 @@ resource "aws_secretsmanager_secret_version" "openai" {
 # ── IAM: EC2 role with Secrets Manager read access ──────────────
 
 resource "aws_iam_role" "backtest" {
-  name = "pineback-ec2-role"
+  name = "pineback-${local.slug}-ec2-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -122,12 +129,12 @@ resource "aws_iam_role" "backtest" {
   })
 
   tags = {
-    Name = "pineback-ec2-role"
+    Name = "pineback-${local.slug}-ec2-role"
   }
 }
 
 resource "aws_iam_role_policy" "secrets_read" {
-  name = "pineback-secrets-read"
+  name = "pineback-${local.slug}-secrets-read"
   role = aws_iam_role.backtest.id
 
   policy = jsonencode({
@@ -141,7 +148,7 @@ resource "aws_iam_role_policy" "secrets_read" {
 }
 
 resource "aws_iam_instance_profile" "backtest" {
-  name = "pineback-ec2-profile"
+  name = "pineback-${local.slug}-ec2-profile"
   role = aws_iam_role.backtest.name
 }
 
@@ -169,7 +176,7 @@ resource "aws_instance" "backtest" {
   })
 
   tags = {
-    Name = "pineback"
+    Name = "pineback-${local.slug}"
   }
 }
 
@@ -180,7 +187,7 @@ resource "aws_eip" "backtest" {
   domain   = "vpc"
 
   tags = {
-    Name = "backtest-eip"
+    Name = "pineback-${local.slug}-eip"
   }
 }
 
