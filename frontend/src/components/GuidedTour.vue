@@ -257,64 +257,81 @@ defineExpose({ startTour, advanceIfActive })
 </script>
 
 <style>
-/* Custom Shepherd theme — dark glassmorphism */
-.shepherd-theme-custom {
-  max-width: 420px;
+/* ── Dark theme override for Shepherd.js ────────────────────── */
+/* Must use !important to override shepherd's default styles */
+
+.shepherd-element {
+  z-index: 9999 !important;
+  max-width: 400px !important;
 }
 
-.shepherd-theme-custom .shepherd-content {
-  background: rgba(20, 24, 40, 0.97);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(20px);
-  padding: 0;
+.shepherd-element .shepherd-content {
+  background: #141828 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7) !important;
+  padding: 0 !important;
 }
 
-.shepherd-theme-custom .shepherd-header {
-  background: transparent;
-  padding: 16px 20px 0;
+.shepherd-element .shepherd-arrow:before {
+  background: #141828 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-.shepherd-theme-custom .shepherd-title {
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
+.shepherd-element .shepherd-header {
+  background: rgba(99, 102, 241, 0.12) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  padding: 14px 18px !important;
+  border-radius: 14px 14px 0 0 !important;
 }
 
-.shepherd-theme-custom .shepherd-cancel-icon {
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 18px;
+.shepherd-element .shepherd-title {
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  font-family: 'Inter', sans-serif !important;
 }
 
-.shepherd-theme-custom .shepherd-cancel-icon:hover {
-  color: rgba(255, 255, 255, 0.7);
+.shepherd-element .shepherd-cancel-icon {
+  color: rgba(255, 255, 255, 0.3) !important;
+  font-size: 20px !important;
 }
 
-.shepherd-theme-custom .shepherd-text {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 13px;
-  line-height: 1.6;
-  padding: 12px 20px;
-  font-family: 'Inter', sans-serif;
+.shepherd-element .shepherd-cancel-icon:hover {
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
-.shepherd-theme-custom .shepherd-footer {
-  padding: 0 20px 16px;
-  border-top: none;
+.shepherd-element .shepherd-text {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 13px !important;
+  line-height: 1.7 !important;
+  padding: 16px 18px !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.shepherd-element .shepherd-text p {
+  margin: 0 0 8px !important;
+}
+
+.shepherd-element .shepherd-footer {
+  padding: 0 18px 16px !important;
+  border-top: none !important;
+}
+
+.shepherd-element .shepherd-button {
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  font-family: 'Inter', sans-serif !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
 }
 
 .shepherd-button-primary {
   background: #6366f1 !important;
   color: #fff !important;
   border: none !important;
-  border-radius: 8px !important;
-  padding: 8px 20px !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  cursor: pointer !important;
-  transition: background 0.2s !important;
+  padding: 9px 22px !important;
 }
 
 .shepherd-button-primary:hover {
@@ -325,11 +342,7 @@ defineExpose({ startTour, advanceIfActive })
   background: rgba(255, 255, 255, 0.06) !important;
   color: rgba(255, 255, 255, 0.6) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 8px !important;
   padding: 8px 16px !important;
-  font-size: 13px !important;
-  cursor: pointer !important;
-  transition: all 0.2s !important;
 }
 
 .shepherd-button-secondary:hover {
@@ -341,13 +354,9 @@ defineExpose({ startTour, advanceIfActive })
   z-index: 9998 !important;
 }
 
-.shepherd-element {
-  z-index: 9999 !important;
-}
-
-/* Pulsing highlight on target */
-.shepherd-target-highlight {
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3), 0 0 20px rgba(99, 102, 241, 0.15);
+/* Highlighted target element */
+.shepherd-has-active-tour .shepherd-target {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4) !important;
   border-radius: 8px;
 }
 </style>
