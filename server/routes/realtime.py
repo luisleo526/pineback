@@ -16,8 +16,18 @@ from ..secrets import get_secret
 
 router = APIRouter(prefix="/api/realtime", tags=["realtime"])
 
-OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
 OPENAI_REALTIME_URL = "https://api.openai.com/v1/realtime/calls"
+
+# Resolved lazily on first request so the module can import before
+# Secrets Manager credentials or env vars are fully available.
+_openai_api_key: str | None = None
+
+
+def _get_openai_key() -> str:
+    global _openai_api_key
+    if _openai_api_key is None:
+        _openai_api_key = get_secret("OPENAI_API_KEY")
+    return _openai_api_key
 
 # ── Tool definitions for the voice agent ──────────────────────
 # These are sent in the session config so the AI model knows what
@@ -111,10 +121,11 @@ async def create_realtime_session(request: Request):
     Content-Type: application/sdp. We combine it with our session
     config and forward to OpenAI's /v1/realtime/calls endpoint.
     """
-    if not OPENAI_API_KEY:
+    api_key = _get_openai_key()
+    if not api_key:
         raise HTTPException(
             status_code=500,
-            detail="OPENAI_API_KEY environment variable is not set",
+            detail="OPENAI_API_KEY is not configured (check Secrets Manager or env var)",
         )
 
     # Read the raw SDP offer from the browser
@@ -129,7 +140,7 @@ async def create_realtime_session(request: Request):
             resp = await client.post(
                 OPENAI_REALTIME_URL,
                 headers={
-                    "Authorization": f"Bearer {OPENAI_API_KEY}",
+                    "Authorization": f"Bearer {api_key}",
                 },
                 files={
                     "sdp": (None, sdp_offer, "application/sdp"),
