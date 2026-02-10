@@ -23,8 +23,11 @@ function createTour() {
       classes: 'shepherd-theme-custom',
       scrollTo: { behavior: 'smooth', block: 'center' },
       cancelIcon: { enabled: true },
-      modalOverlayOpeningPadding: 8,
-      modalOverlayOpeningRadius: 12,
+      modalOverlayOpeningPadding: 12,
+      modalOverlayOpeningRadius: 10,
+      popperOptions: {
+        modifiers: [{ name: 'offset', options: { offset: [0, 16] } }],
+      },
     },
   })
 
@@ -50,7 +53,7 @@ function createTour() {
       <p>Click this dropdown to see 12 pre-built strategy templates.</p>
       <p class="text-xs opacity-40 mt-2">Step 2 of 12 · Click the button to continue</p>
     `,
-    attachTo: { element: '#template-dropdown', on: 'bottom' },
+    attachTo: { element: '#template-dropdown', on: 'right' },
     advanceOn: { selector: '#template-dropdown button', event: 'click' },
     buttons: [],
   })
@@ -63,10 +66,8 @@ function createTour() {
       <p>Click <strong>"MACD Crossover"</strong> from the list to load it into the builder.</p>
       <p class="text-xs opacity-40 mt-2">Step 3 of 12 · Click a template to continue</p>
     `,
-    attachTo: { element: '#template-dropdown', on: 'bottom' },
+    attachTo: { element: '#template-dropdown', on: 'right' },
     buttons: [],
-    // This step advances programmatically when the template is loaded
-    // The parent (BacktestApp) calls tour.next() after loading
   })
 
   // Step 4: Click Long Exit tab (action)
@@ -78,7 +79,7 @@ function createTour() {
       <p class="mt-1">Click the <strong>"Long Exit"</strong> tab to see its exit conditions.</p>
       <p class="text-xs opacity-40 mt-2">Step 4 of 12 · Click the tab to continue</p>
     `,
-    attachTo: { element: '[data-signal="longExit"]', on: 'bottom' },
+    attachTo: { element: '[data-signal="longExit"]', on: 'right' },
     advanceOn: { selector: '[data-signal="longExit"]', event: 'click' },
     buttons: [],
   })
@@ -97,7 +98,7 @@ function createTour() {
       <p class="mt-2 text-sm opacity-70">Here, <em>macdLine crossunder signalLine</em> triggers a long exit.</p>
       <p class="text-xs opacity-40 mt-2">Step 5 of 12</p>
     `,
-    attachTo: { element: '.condition-row', on: 'bottom' },
+    attachTo: { element: '.condition-row', on: 'right' },
     buttons: [
       { text: '← Back', action: tour.back, classes: 'shepherd-button-secondary' },
       { text: 'Next →', action: tour.next, classes: 'shepherd-button-primary' },
@@ -112,7 +113,7 @@ function createTour() {
       <p>Click the <strong>"Variables"</strong> tab to see the indicators used by this strategy.</p>
       <p class="text-xs opacity-40 mt-2">Step 6 of 12 · Click the tab to continue</p>
     `,
-    attachTo: { element: '[data-tab="variables"]', on: 'bottom' },
+    attachTo: { element: '[data-tab="variables"]', on: 'left' },
     advanceOn: { selector: '[data-tab="variables"]', event: 'click' },
     buttons: [],
   })
@@ -140,7 +141,7 @@ function createTour() {
       <p>Click the <strong>"Backtest"</strong> button to open the configuration panel.</p>
       <p class="text-xs opacity-40 mt-2">Step 8 of 12 · Click to continue</p>
     `,
-    attachTo: { element: '[data-tab="backtest"]', on: 'bottom' },
+    attachTo: { element: '[data-tab="backtest"]', on: 'left' },
     advanceOn: { selector: '[data-tab="backtest"]', event: 'click' },
     buttons: [],
     // Fallback: if there's no data-tab="backtest", try the Backtest toggle button
@@ -154,7 +155,7 @@ function createTour() {
       <p>Select a timeframe for your backtest. Try <strong>"1 Hour"</strong> for a good balance of speed and detail.</p>
       <p class="text-xs opacity-40 mt-2">Step 9 of 12 · Select a timeframe to continue</p>
     `,
-    attachTo: { element: '#timeframe-select', on: 'bottom' },
+    attachTo: { element: '#timeframe-select', on: 'left' },
     advanceOn: { selector: '#timeframe-select', event: 'change' },
     buttons: [],
   })
@@ -168,7 +169,7 @@ function createTour() {
       <p class="mt-1 text-sm opacity-70">Notice the <em>Magnifier</em> toggle — when ON, the backtest uses intra-bar fills for more realistic results.</p>
       <p class="text-xs opacity-40 mt-2">Step 10 of 12 · Fill both dates, then click Next</p>
     `,
-    attachTo: { element: '#date-range-inputs', on: 'top' },
+    attachTo: { element: '#date-range-inputs', on: 'left' },
     buttons: [
       { text: '← Back', action: tour.back, classes: 'shepherd-button-secondary' },
       { text: 'Next →', action: tour.next, classes: 'shepherd-button-primary' },
@@ -184,7 +185,7 @@ function createTour() {
       <p class="mt-1 text-sm opacity-70">The system will compile your PineScript, load SPY data, and run the backtest with progress tracking.</p>
       <p class="text-xs opacity-40 mt-2">Step 11 of 12 · Click Run Backtest to continue</p>
     `,
-    attachTo: { element: '#run-backtest-btn', on: 'top' },
+    attachTo: { element: '#run-backtest-btn', on: 'left' },
     advanceOn: { selector: '#run-backtest-btn', event: 'click' },
     buttons: [],
   })
