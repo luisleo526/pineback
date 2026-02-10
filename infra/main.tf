@@ -112,7 +112,7 @@ resource "aws_instance" "backtest" {
   })
 
   tags = {
-    Name = "backtest-system"
+    Name = "pineback"
   }
 }
 

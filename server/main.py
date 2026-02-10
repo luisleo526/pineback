@@ -17,8 +17,8 @@ from .routes.backtests import router as backtests_router
 from .routes.symbols import router as symbols_router
 
 app = FastAPI(
-    title="Backtest System",
-    description="US stock backtesting with PineScript compiler and vectorbt",
+    title="PineBack",
+    description="PineScript v6 backtesting platform with visual strategy builder and vectorbt",
     version="1.0.0",
 )
 

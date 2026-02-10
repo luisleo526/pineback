@@ -9,7 +9,7 @@
       <div class="flex items-center gap-3">
         <h1 class="text-sm font-semibold text-white/80">
           <i class="fas fa-chart-line mr-1.5 text-accent-500"></i>
-          Backtest System
+          PineBack
         </h1>
 
         <div class="h-5 w-px bg-white/[0.06]"></div>
@@ -68,6 +68,7 @@
         </button>
 
         <button
+          data-tab="backtest"
           @click="toggleBacktestPanel"
           class="glass-btn flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg"
           :class="showBacktestPanel ? '!bg-accent-500/10 !text-accent-400' : ''"
@@ -111,7 +112,7 @@
     </div>
 
     <!-- Guided Tour -->
-    <GuidedTour ref="tourRef" @load-template="loadFirstTemplate" />
+    <GuidedTour ref="tourRef" @load-template="loadFirstTemplate" @open-backtest="showBacktestPanel = true" />
   </div>
 </template>
 
@@ -128,7 +129,8 @@ const builderRef = ref(null)
 const jobTrackerRef = ref(null)
 const templateBtnRef = ref(null)
 const tourRef = ref(null)
-const showBacktestPanel = ref(true)
+// Hide backtest panel initially during the guided tour so Step 8 can open it
+const showBacktestPanel = ref(!!localStorage.getItem('tour_completed'))
 const showTemplateMenu = ref(false)
 
 // Position the dropdown below the button using fixed positioning

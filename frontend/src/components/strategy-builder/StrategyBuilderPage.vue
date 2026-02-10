@@ -177,6 +177,7 @@
         <!-- Right Panel Tabs -->
         <div class="flex p-1.5 gap-1 border-b border-white/[0.04]">
           <button
+            data-tab="variables"
             @click="rightPanelTab = 'variables'"
             :class="[
               'flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-all',
@@ -188,6 +189,7 @@
             <i class="fas fa-cube mr-1.5 text-[10px]"></i>Variables
           </button>
           <button
+            data-tab="inputs"
             @click="rightPanelTab = 'inputs'"
             :class="[
               'flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-all',

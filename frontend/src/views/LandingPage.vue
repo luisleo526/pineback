@@ -16,7 +16,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
             </svg>
           </div>
-          <span class="text-sm font-semibold tracking-wide">BACKTEST SYSTEM</span>
+          <span class="text-sm font-semibold tracking-wide">PINEBACK</span>
         </div>
         <div class="flex items-center gap-6">
           <a :href="githubUrl" target="_blank" class="text-dark-300 hover:text-white transition-colors text-sm">GitHub</a>
@@ -36,13 +36,16 @@
             Full-Stack Interview Project
           </div>
           <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
-            US Stock
-            <span class="bg-gradient-to-r from-accent-400 to-accent-600 bg-clip-text text-transparent"> Backtesting</span>
-            <br />System
+            <span class="bg-gradient-to-r from-accent-400 to-accent-600 bg-clip-text text-transparent">PineBack</span>
           </h1>
-          <p class="text-lg sm:text-xl text-dark-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-            A production-grade quantitative backtesting platform featuring a visual strategy builder,
-            PineScript v6 compiler, dual execution engines, and TradingView-style charting.
+          <p class="text-lg sm:text-xl text-dark-300 max-w-2xl mx-auto mb-4 leading-relaxed">
+            A production-grade backtesting platform that speaks
+            <strong class="text-white">PineScript v6</strong> — the same language used by
+            <strong class="text-white">TradingView's global algo-trading community</strong>.
+          </p>
+          <p class="text-base text-dark-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Build strategies visually, generate TradingView-compatible PineScript, and backtest locally with realistic execution.
+            Every script works both here <em>and</em> on TradingView — one strategy, two platforms.
           </p>
           <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
             <router-link
@@ -370,7 +373,7 @@
             </div>
             <pre class="p-5 text-sm font-mono text-dark-200 leading-relaxed overflow-x-auto"><span class="text-dark-500"># Clone & setup</span>
 <span class="text-accent-400">git</span> clone {{ githubUrl }}.git
-<span class="text-accent-400">cd</span> backtest-system
+<span class="text-accent-400">cd</span> pineback
 
 <span class="text-dark-500"># Backend</span>
 <span class="text-accent-400">cd</span> backend
@@ -531,7 +534,7 @@
     <!-- Footer -->
     <footer class="relative z-10 border-t border-white/[0.06] py-8">
       <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="text-xs text-dark-500">Built as an interview project &middot; 2025</div>
+        <div class="text-xs text-dark-500">PineBack &middot; Built as an interview project &middot; 2025</div>
         <div class="flex items-center gap-4 text-xs text-dark-500">
           <a :href="githubUrl" target="_blank" class="hover:text-dark-300 transition-colors">GitHub</a>
           <span>&middot;</span>
@@ -545,13 +548,13 @@
 <script setup>
 import { ref } from 'vue'
 
-const githubUrl = 'https://github.com/YOUR_USERNAME/backtest-system'
+const githubUrl = 'https://github.com/YOUR_USERNAME/pineback'
 
 // Hero stat previews
 const heroStats = [
   { label: 'CAGR', value: '+18.4%', color: 'text-green-400' },
   { label: 'Sharpe Ratio', value: '2.15', color: 'text-accent-400' },
-  { label: 'Max Drawdown', value: '-12.5%', color: 'text-red-400' },
+  { label: 'Max Drawdown', value: '12.5%', color: 'text-red-400' },
   { label: 'Win Rate', value: '57.1%', color: 'text-green-400' },
 ]
 
@@ -604,20 +607,28 @@ const features = [
   },
 ]
 
-// Metrics
+// Metrics — must match the 4×4 grid in StatsCards.vue
 const metrics = [
+  // Row 1
+  { name: 'Net Profit', sample: '+$1,842', formula: 'Final value - Initial capital', color: 'text-green-400' },
   { name: 'CAGR', sample: '+18.4%', formula: 'Compound annual growth rate', color: 'text-green-400' },
   { name: 'Ann. Volatility', sample: '14.2%', formula: 'Std dev of returns \u00D7 \u221A252', color: 'text-white' },
+  { name: 'Max Drawdown', sample: '12.5%', formula: 'Largest peak-to-trough', color: 'text-red-400' },
+  // Row 2
   { name: 'Sharpe Ratio', sample: '2.15', formula: '(Return - Rf) / Volatility', color: 'text-accent-400' },
   { name: 'Sortino Ratio', sample: '3.20', formula: 'Return / Downside deviation', color: 'text-accent-400' },
-  { name: 'Calmar Ratio', sample: '1.85', formula: 'CAGR / Max drawdown', color: 'text-accent-400' },
-  { name: 'Max Drawdown', sample: '-12.5%', formula: 'Largest peak-to-trough', color: 'text-red-400' },
   { name: 'Profit Factor', sample: '1.85', formula: 'Gross profit / Gross loss', color: 'text-green-400' },
-  { name: 'Win Rate', sample: '57.1%', formula: 'Winning trades / Total', color: 'text-green-400' },
   { name: 'Expectancy', sample: '$106.75', formula: 'Avg win \u00D7 WR - Avg loss \u00D7 LR', color: 'text-green-400' },
+  // Row 3
   { name: 'Total Trades', sample: '28', formula: 'Round-trip count', color: 'text-white' },
+  { name: 'Win Rate', sample: '57.1%', formula: 'Winning trades / Total', color: 'text-green-400' },
   { name: 'Best Trade', sample: '+8.3%', formula: 'Highest single return', color: 'text-green-400' },
   { name: 'Worst Trade', sample: '-4.1%', formula: 'Lowest single return', color: 'text-red-400' },
+  // Row 4
+  { name: 'Avg Winning Trade', sample: '+3.2%', formula: 'Mean return of winners', color: 'text-green-400' },
+  { name: 'Avg Losing Trade', sample: '-1.8%', formula: 'Mean return of losers', color: 'text-red-400' },
+  { name: 'Avg Win Duration', sample: '3d 4h', formula: 'Mean holding period (wins)', color: 'text-white/70' },
+  { name: 'Avg Loss Duration', sample: '1d 12h', formula: 'Mean holding period (losses)', color: 'text-white/70' },
 ]
 
 // Architecture layers
@@ -680,6 +691,7 @@ const techStack = [
 
 // Assumptions
 const assumptions = [
+  { title: 'PineScript v6 — TradingView Compatible', detail: 'PineBack adopts PineScript v6 because TradingView has the largest global algo-trading community. Strategies generated here are valid PineScript — you can paste them directly into TradingView and they will work. One strategy, two platforms.' },
   { title: 'SPY Only (by default)', detail: 'SPY 1-minute OHLCV data sourced from Kaggle (kaggle.com/datasets/rockinbrock/spy-1-minute-data). The architecture supports multiple symbols via the DataSource protocol, but SPY is the default for the interview demo.' },
   { title: 'Stateless Strategies', detail: 'Strategies are pure functions of price data — no portfolio state carryover between bars. This matches the PineScript execution model and simplifies the compiler.' },
   { title: 'Configurable Commission & Slippage', detail: 'Default: 0.1% commission, 0.05% slippage per trade. Both are configurable in the backtest config panel to model different broker scenarios.' },

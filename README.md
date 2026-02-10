@@ -1,24 +1,34 @@
-# US Stock Backtesting System
+# PineBack
 
-A full-stack, verifiable and reproducible backtesting platform with a no-code visual strategy builder, PineScript v6 compiler, and TradingView-style results.
+A full-stack backtesting platform that speaks **PineScript v6** — the same language used by TradingView's global algo-trading community.
+
+Build strategies visually, generate TradingView-compatible PineScript, and backtest locally with realistic execution. Every generated script works both in PineBack _and_ on TradingView — **one strategy, two platforms**.
 
 > **Live demo**: [interview.4pass.io](https://interview.4pass.io)
 
 ---
 
+## Why PineScript?
+
+TradingView has the **largest global community** of retail algo-traders, all writing strategies in PineScript. By adopting PineScript v6 as the strategy language, PineBack can:
+
+- **Serve the existing community** — any PineScript strategy can be backtested here with custom data and execution models
+- **Export to TradingView** — strategies built in PineBack's visual builder generate valid PineScript that runs on TradingView directly
+- **Leverage a familiar syntax** — no new language to learn for millions of TradingView users
+
 ## Metrics
 
 Every backtest produces a comprehensive set of performance metrics:
 
+- **Net Profit** — final value minus initial capital
 - **CAGR / Annualized Return** — compound annual growth rate
 - **Annualized Volatility** — standard deviation of returns, annualized
+- **Max Drawdown** — largest peak-to-trough decline (% and duration)
 - **Sharpe Ratio** — risk-adjusted return (excess return / volatility)
 - **Sortino Ratio** — downside-risk-adjusted return
-- **Max Drawdown** — largest peak-to-trough decline (% and duration)
 - **Profit Factor** — gross profit / gross loss
-- **Win Rate** — percentage of winning trades
 - **Expectancy** — average profit per trade
-- **Total Trades, Best/Worst Trade, Avg Win/Loss, Avg Duration**
+- **Total Trades, Win Rate, Best/Worst Trade, Avg Win/Loss, Avg Duration**
 
 ## Architecture
 
@@ -42,16 +52,18 @@ FastAPI (uvicorn)
 
 ## Features
 
-| Feature | Description | Use Case |
-|---------|-------------|----------|
-| No-code strategy builder | Visual condition builder with 40+ indicators, AND/OR logic, custom variables, math expressions | Non-programmers can build and test trading strategies |
-| PineScript v6 compiler | Tokenizer → Parser → AST → Python codegen | Execute TradingView-compatible strategies programmatically |
-| Magnifier mode | Iterates sub-bars for realistic intra-bar fill prices on higher timeframes | Avoid unrealistic bar-close fills on 1h/4h/1d backtests |
-| OHLCV chart + markers | Candlestick + volume (synced panes) with horizontal arrow markers at exact fill prices | Visually verify timing and price accuracy of trades |
-| Real-time progress | Background jobs with DB-persisted progress (0-100%), 2s frontend polling | Know when long backtests will finish |
-| 12 strategy templates | Pre-built classic strategies (MACD, RSI, BB, SuperTrend, etc.) with long+short signals | Quick-start with proven strategies, then customize |
-| Configurable parameters | Order size, commission, slippage, timeframe, date range, magnifier toggle | Model different broker scenarios |
-| Infrastructure as code | Fully parameterized Terraform for AWS EC2 + Route 53 | One-command cloud deployment to any AWS account |
+| Feature | Description |
+|---------|-------------|
+| No-code strategy builder | Visual condition builder with 40+ indicators, AND/OR logic, custom variables, math expressions |
+| PineScript v6 compiler | Tokenizer → Parser → AST → Python codegen; generated scripts also run on TradingView |
+| TradingView-compatible output | Every generated PineScript can be pasted into TradingView and executed directly |
+| Magnifier mode | Iterates sub-bars for realistic intra-bar fill prices on higher timeframes |
+| OHLCV chart + markers | Candlestick + volume (synced panes) with horizontal arrow markers at exact fill prices |
+| Real-time progress | Background jobs with DB-persisted progress (0-100%), 2s frontend polling |
+| 12 strategy templates | Pre-built classic strategies (MACD, RSI, BB, SuperTrend, etc.) with long+short signals |
+| Configurable parameters | Order size, commission, slippage, timeframe, date range, magnifier toggle |
+| Infrastructure as code | Fully parameterized Terraform for AWS EC2 + Route 53 |
+| Interactive guided tutorial | Step-by-step walkthrough for first-time users (shepherd.js) |
 
 ## Quick Start (Local Development)
 
@@ -107,6 +119,7 @@ Open **http://localhost:5173** — landing page at `/`, app at `/app`.
 2. Set dates (e.g., 2019-01-01 to 2020-12-31), click **Run Backtest**
 3. Watch the progress bar, then click **View** to see results
 4. Check: Overview (16 metrics), Chart (OHLCV with trade markers), Trades (entry/exit table)
+5. Copy the generated PineScript and paste it into TradingView — it will run there too
 
 ## Docker Deployment
 
@@ -131,6 +144,7 @@ Requires: AWS account with a Route 53 hosted zone and an EC2 key pair. All resou
 
 ## Key Assumptions
 
+- **PineScript v6 as the strategy language** — TradingView has the largest global algo-trading community; generated scripts are cross-platform (PineBack + TradingView)
 - **SPY is the only symbol** — ~1.4M 1-minute bars from 2008-01-22 to 2021-05-06, sourced from [Kaggle](https://www.kaggle.com/datasets/rockinbrock/spy-1-minute-data)
 - **Strategies are stateless** — no persistent bar-to-bar variables (`var`/`varip`)
 - **Configurable execution costs** — commission (default 0.1%), slippage (default 0.05%), order size (default 100% equity)
@@ -158,18 +172,3 @@ Requires: AWS account with a Route 53 hosted zone and an EC2 key pair. All resou
 | **Frontend** | Vue 3, Vite, Tailwind CSS, lightweight-charts (Series Primitives), shepherd.js |
 | **Infrastructure** | Docker, Terraform, AWS EC2, Route 53, nginx, Let's Encrypt |
 | **Data** | [SPY 1-minute OHLCV from Kaggle](https://www.kaggle.com/datasets/rockinbrock/spy-1-minute-data), 2008-2021 (~1.4M candles, ~120MB CSV via Git LFS) |
-
-## Bonus Features
-
-| Feature | Use Case |
-|---------|----------|
-| No-code visual strategy builder (40+ indicators) | Non-programmers can create strategies without writing code |
-| Magnifier mode with sub-bar execution | Realistic fill prices on higher timeframes |
-| Real-time progress tracking (0-100%) | Monitor long-running backtests |
-| 12 pre-built strategy templates (long+short) | Quick-start backtesting without building from scratch |
-| OHLCV candlestick chart with horizontal arrow markers at exact fill prices | Visually verify trade entry/exit accuracy |
-| TradingView-style performance dashboard (16 metrics) | Comprehensive strategy evaluation |
-| Dedicated result page with Overview/Chart/Trades tabs | Clear, focused result presentation |
-| Configurable order sizing (% equity or fixed qty) | Test different position sizing strategies |
-| Infrastructure as Code (Terraform, fully parameterized) | One-command deployment to any AWS account |
-| Interactive guided tutorial (shepherd.js) | Reviewer can experience the full workflow in 3 minutes |
