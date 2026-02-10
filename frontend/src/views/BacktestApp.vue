@@ -103,7 +103,6 @@
             <div class="border-t border-white/[0.04]">
               <BacktestJobTracker
                 ref="jobTrackerRef"
-                @view-result="handleViewResult"
               />
             </div>
           </div>
@@ -111,26 +110,14 @@
       </transition>
     </div>
 
-    <!-- Result Detail (slide up from bottom) -->
-    <transition name="slide-up">
-      <div
-        v-if="activeResult"
-        class="border-t border-white/[0.06]"
-        style="max-height: 60vh; overflow-y: auto; background: #0b0e1c;"
-      >
-        <ResultDetail :result="activeResult" @close="activeResult = null" />
-      </div>
-    </transition>
-
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import StrategyBuilderPage from '../components/strategy-builder/StrategyBuilderPage.vue'
 import BacktestConfigPanel from '../components/backtest/BacktestConfigPanel.vue'
 import BacktestJobTracker from '../components/backtest/BacktestJobTracker.vue'
-import ResultDetail from '../components/backtest/ResultDetail.vue'
 import { getStrategies } from '../api/index.js'
 
 // ── Refs ──────────────────────────────────────────────────────
@@ -154,7 +141,6 @@ const templateMenuStyle = computed(() => {
 })
 const templates = ref([])
 const generatedCode = ref('')
-const activeResult = ref(null)
 
 // ── Lifecycle ─────────────────────────────────────────────────
 onMounted(async () => {
@@ -219,10 +205,6 @@ function handleRunBacktest(config) {
   }
 }
 
-// ── Result viewing ────────────────────────────────────────────
-function handleViewResult(result) {
-  activeResult.value = result
-}
 
 // ── Tutorial (stub — implemented in GuidedTour commit) ────────
 function showTutorial() {

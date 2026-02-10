@@ -84,8 +84,10 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
 import { submitBacktest as apiSubmitBacktest, getBacktest } from '../../api/index.js'
 
+const router = useRouter()
 const emit = defineEmits(['view-result'])
 
 const jobs = ref([])
@@ -151,8 +153,8 @@ async function pollJob(job) {
 }
 
 function viewResult(job) {
-  if (job.status === 'completed' && job.result) {
-    emit('view-result', job.result)
+  if (job.status === 'completed' && job.id) {
+    router.push({ name: 'result', params: { id: job.id } })
   }
 }
 

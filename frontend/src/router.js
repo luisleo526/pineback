@@ -11,6 +11,11 @@ const routes = [
     name: 'backtest-app',
     component: () => import('./views/BacktestApp.vue'),
   },
+  {
+    path: '/result/:id',
+    name: 'result',
+    component: () => import('./views/ResultPage.vue'),
+  },
 ]
 
 export default createRouter({
