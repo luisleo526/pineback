@@ -299,6 +299,21 @@ class Backtester:
         """Extract maximum-detail BacktestResult from vbt.Portfolio."""
         stats = pf.stats()
 
+        # ── Compute annualized metrics (not in vbt.stats()) ──────
+        try:
+            returns = pf.returns()
+            total_return = float(stats.get("Total Return [%]", 0)) / 100
+            n_days = (returns.index[-1] - returns.index[0]).days
+            if n_days > 0:
+                annualized_return = ((1 + total_return) ** (365.25 / n_days) - 1) * 100
+                annualized_vol = float(returns.std() * (252 ** 0.5) * 100)
+            else:
+                annualized_return = None
+                annualized_vol = None
+        except Exception:
+            annualized_return = None
+            annualized_vol = None
+
         # ── Equity curve (sample to ~1000 points max) ────────
         equity = pf.value()
         total_points = len(equity)
@@ -437,8 +452,8 @@ class Backtester:
             initial_capital=capital,
             final_value=_safe_float(stats.get("End Value")) or capital,
             total_return_pct=_safe_float(stats.get("Total Return [%]")) or 0.0,
-            annualized_return_pct=_safe_float(stats.get("Annualized Return [%]")),
-            annualized_volatility_pct=_safe_float(stats.get("Annualized Volatility [%]")),
+            annualized_return_pct=_safe_float(annualized_return),
+            annualized_volatility_pct=_safe_float(annualized_vol),
             benchmark_return_pct=_safe_float(stats.get("Benchmark Return [%]")) or 0.0,
             total_fees_paid=_safe_float(stats.get("Total Fees Paid")) or 0.0,
             max_gross_exposure_pct=_safe_float(stats.get("Max Gross Exposure [%]")) or 0.0,

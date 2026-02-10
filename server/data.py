@@ -127,32 +127,30 @@ class TimescaleSource:
         end: Optional[str] = None,
     ) -> pd.DataFrame:
         """Load 1m OHLCV from TimescaleDB."""
-        import psycopg2
+        from sqlalchemy import create_engine, text
 
         query = """
             SELECT ts, open, high, low, close, volume
             FROM ohlcv
-            WHERE symbol = %s AND exchange = %s
+            WHERE symbol = :symbol AND exchange = :exchange
         """
-        query_params: list = [symbol, exchange]
+        bind_params = {"symbol": symbol, "exchange": exchange}
 
         if start:
-            query += " AND ts >= %s"
-            query_params.append(start)
+            query += " AND ts >= :start"
+            bind_params["start"] = start
         if end:
-            query += " AND ts <= %s"
-            query_params.append(end)
+            query += " AND ts <= :end"
+            bind_params["end"] = end
 
         query += " ORDER BY ts"
 
-        conn = psycopg2.connect(self.dsn)
-        try:
+        engine = create_engine(self.dsn)
+        with engine.connect() as conn:
             df = pd.read_sql_query(
-                query, conn, params=query_params,
+                text(query), conn, params=bind_params,
                 index_col="ts", parse_dates=["ts"],
             )
-        finally:
-            conn.close()
 
         if df.empty:
             raise ValueError(
