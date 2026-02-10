@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .routes.backtests import router as backtests_router
 from .routes.symbols import router as symbols_router
+from .routes.realtime import router as realtime_router
 
 app = FastAPI(
     title="PineBack",
@@ -27,8 +28,10 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
+        "http://localhost:5174",
         "http://localhost:3000",
         "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -38,6 +41,7 @@ app.add_middleware(
 # API routes (must be registered BEFORE static file mount)
 app.include_router(backtests_router)
 app.include_router(symbols_router)
+app.include_router(realtime_router)
 
 
 @app.get("/api/health")
