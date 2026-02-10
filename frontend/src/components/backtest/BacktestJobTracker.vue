@@ -31,23 +31,39 @@
 
           <div class="min-w-0">
             <div class="text-xs text-white/70 truncate">
-              {{ job.timeframe }} &middot; {{ job.start_date }} &rarr; {{ job.end_date }}
+              {{ job.strategy_name || 'Strategy' }} &middot; {{ job.timeframe }}
             </div>
             <div class="text-[10px] text-white/30 mt-0.5">
-              {{ job.status }}
+              <template v-if="job.status === 'running'">
+                {{ job.progress }}% — {{ job.progress_message }}
+              </template>
+              <template v-else-if="job.status === 'completed'">
+                <span :class="(job.total_return || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'">
+                  {{ (job.total_return || 0) >= 0 ? '+' : '' }}{{ (job.total_return || 0).toFixed(2) }}%
+                </span>
+                &middot; {{ job.total_trades }} trades
+              </template>
+              <template v-else-if="job.status === 'failed'">
+                <span class="text-red-400">{{ job.error || 'Failed' }}</span>
+              </template>
+              <template v-else>
+                {{ job.status }}
+              </template>
+            </div>
+            <!-- Progress bar for running jobs -->
+            <div v-if="job.status === 'running'" class="mt-1.5 h-1 bg-white/[0.06] rounded-full overflow-hidden">
+              <div class="h-full bg-accent-500 rounded-full transition-all duration-500" :style="{ width: `${job.progress}%` }"></div>
             </div>
           </div>
         </div>
 
-        <div v-if="job.status === 'completed' && job.result" class="text-xs text-right flex-shrink-0 ml-2">
-          <span
-            :class="[
-              'font-medium',
-              (job.result.total_return_pct || 0) >= 0 ? 'text-emerald-400' : 'text-red-400',
-            ]"
+        <div v-if="job.status === 'completed'" class="flex-shrink-0 ml-2">
+          <button
+            class="view-results-btn text-[10px] text-accent-400 hover:text-accent-300 px-2 py-1 rounded bg-accent-500/10 hover:bg-accent-500/20 transition-all"
+            @click.stop="viewResult(job)"
           >
-            {{ (job.result.total_return_pct || 0) >= 0 ? '+' : '' }}{{ (job.result.total_return_pct || 0).toFixed(2) }}%
-          </span>
+            View
+          </button>
         </div>
 
         <i
@@ -67,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { submitBacktest as apiSubmitBacktest, getBacktest } from '../../api/index.js'
 
 const emit = defineEmits(['view-result'])
@@ -76,40 +92,52 @@ const jobs = ref([])
 
 // Submit a new backtest and start polling
 async function submitBacktest(config) {
-  let job = null
-
   try {
     const response = await apiSubmitBacktest(config)
-    job = {
+    // Use reactive() so poll mutations trigger re-render
+    const job = reactive({
       id: response.id,
       status: response.status || 'pending',
+      progress: 0,
+      progress_message: 'Queued',
       timeframe: config.timeframe,
       start_date: config.start_date,
       end_date: config.end_date,
+      strategy_name: '',
+      total_return: null,
+      sharpe_ratio: null,
+      total_trades: null,
+      error: null,
       result: null,
-    }
+    })
     // Prepend to list (newest first)
     jobs.value.unshift(job)
+    // Poll in background (don't await — let UI update immediately)
+    pollJob(job)
   } catch (e) {
     console.error('Failed to submit backtest:', e)
-    return
   }
-
-  // Poll for completion
-  await pollJob(job)
 }
 
 async function pollJob(job) {
-  const POLL_INTERVAL = 2500
-  const MAX_POLLS = 240 // ~10 min max
+  const POLL_INTERVAL = 2000
+  const MAX_POLLS = 300 // ~10 min max
 
   for (let i = 0; i < MAX_POLLS; i++) {
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL))
+
     try {
       const data = await getBacktest(job.id)
       job.status = data.status
+      job.progress = data.progress || 0
+      job.progress_message = data.progress_message || ''
+      job.strategy_name = data.strategy_name || ''
 
       if (data.status === 'completed') {
-        job.result = data.result_json || data.result
+        job.total_return = data.total_return
+        job.sharpe_ratio = data.sharpe_ratio
+        job.total_trades = data.total_trades
+        job.result = data.result_json || null
         return
       }
       if (data.status === 'failed') {
@@ -119,8 +147,6 @@ async function pollJob(job) {
     } catch (e) {
       console.error('Poll error:', e)
     }
-
-    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL))
   }
 }
 
