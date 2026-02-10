@@ -192,7 +192,6 @@ class Backtester:
             size_type=size_type,
             fees=fees,
             slippage=slippage,
-            upon_opposite_signal='close',  # close current, don't reverse on same bar
             freq=RESAMPLE_MAP.get(timeframe, timeframe),
         )
 
@@ -312,7 +311,6 @@ class Backtester:
             size_type=size_type,
             fees=fees,
             slippage=slippage,
-            upon_opposite_signal='close',  # close current, don't reverse on same bar
             freq=mag_freq,
         )
 
