@@ -1,0 +1,57 @@
+# Backtest local development stack
+#
+# TimescaleDB + PgBouncer for local development.
+#
+# Usage:
+#   cd server/docker
+#   docker compose up -d          # start
+#   docker compose logs -f db     # watch logs
+#   docker compose down           # stop
+#   docker compose down -v        # stop + delete data
+#
+# Direct DB connection (for debugging):
+#   postgresql://backtest:backtest@localhost:5433/backtest
+#
+# PgBouncer connection (app should use this):
+#   postgresql://backtest:backtest@localhost:5434/backtest
+
+services:
+  db:
+    image: timescale/timescaledb:latest-pg16
+    container_name: backtest-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: backtest
+      POSTGRES_USER: backtest
+      POSTGRES_PASSWORD: backtest
+    ports:
+      - "5433:5432"
+    volumes:
+      - backtest-pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U backtest -d backtest"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: backtest-pgbouncer
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://backtest:backtest@db:5432/backtest
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 100
+      DEFAULT_POOL_SIZE: 20
+      MIN_POOL_SIZE: 5
+      SERVER_RESET_QUERY: DISCARD ALL
+      AUTH_TYPE: plain
+    ports:
+      - "5434:5432"
+
+volumes:
+  backtest-pgdata:
