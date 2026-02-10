@@ -24,30 +24,36 @@
     </div>
 
     <!-- Date Range -->
-    <div class="grid grid-cols-2 gap-2" id="date-range-inputs">
-      <div>
-        <label class="block text-xs text-white/40 mb-1">Start Date</label>
-        <input
-          v-model="config.startDate"
-          type="date"
-          id="date-start"
-          required
-          class="w-full bg-dark-800 border border-dark-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500"
-          :min="symbolInfo?.minDate"
-          :max="symbolInfo?.maxDate"
-        />
+    <div id="date-range-inputs">
+      <div v-if="symbolInfo" class="text-[10px] text-white/25 mb-1.5">
+        <i class="fas fa-database mr-1"></i>
+        SPY data: {{ symbolInfo.minDate }} to {{ symbolInfo.maxDate }}
       </div>
-      <div>
-        <label class="block text-xs text-white/40 mb-1">End Date</label>
-        <input
-          v-model="config.endDate"
-          type="date"
-          id="date-end"
-          required
-          class="w-full bg-dark-800 border border-dark-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500"
-          :min="symbolInfo?.minDate"
-          :max="symbolInfo?.maxDate"
-        />
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-xs text-white/40 mb-1">Start Date</label>
+          <input
+            v-model="config.startDate"
+            type="date"
+            id="date-start"
+            required
+            class="w-full bg-dark-800 border border-dark-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500"
+            :min="symbolInfo?.minDate"
+            :max="symbolInfo?.maxDate"
+          />
+        </div>
+        <div>
+          <label class="block text-xs text-white/40 mb-1">End Date</label>
+          <input
+            v-model="config.endDate"
+            type="date"
+            id="date-end"
+            required
+            class="w-full bg-dark-800 border border-dark-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500"
+            :min="symbolInfo?.minDate"
+            :max="symbolInfo?.maxDate"
+          />
+        </div>
       </div>
     </div>
 
@@ -154,9 +160,9 @@
     </button>
 
     <!-- Validation hints -->
-    <p v-if="!config.startDate || !config.endDate" class="text-[10px] text-amber-400/70">
+    <p v-if="dateError" class="text-[10px] text-amber-400/70">
       <i class="fas fa-exclamation-triangle mr-1"></i>
-      Please select a date range
+      {{ dateError }}
     </p>
     <p v-else-if="!props.generatedCode || props.generatedCode.length < 20" class="text-[10px] text-amber-400/70">
       <i class="fas fa-exclamation-triangle mr-1"></i>
@@ -225,12 +231,16 @@ onMounted(async () => {
     const symbols = await getSymbols()
     if (symbols.length > 0) {
       const first = symbols[0]
-      // API may return ISO-8601 or space-separated timestamps
-      const minRaw = first.min_ts || ''
-      const maxRaw = first.max_ts || ''
+      // Extract YYYY-MM-DD from timestamps like "2008-01-22 07:30:00+00"
+      const extractDate = (raw) => {
+        if (!raw) return ''
+        // Try ISO format first (has T), then space-separated
+        const m = raw.match(/^(\d{4}-\d{2}-\d{2})/)
+        return m ? m[1] : ''
+      }
       symbolInfo.value = {
-        minDate: minRaw.split('T')[0] || minRaw.split(' ')[0],
-        maxDate: maxRaw.split('T')[0] || maxRaw.split(' ')[0],
+        minDate: extractDate(first.min_ts),
+        maxDate: extractDate(first.max_ts),
       }
     }
   } catch (e) {
@@ -279,10 +289,19 @@ watch(
 )
 
 // ── Validation ────────────────────────────────────────────────
+const dateError = computed(() => {
+  if (!config.startDate || !config.endDate) return 'Please select a date range'
+  if (config.startDate >= config.endDate) return 'Start date must be before end date'
+  if (symbolInfo.value) {
+    if (config.startDate < symbolInfo.value.minDate) return `Start date before available data (${symbolInfo.value.minDate})`
+    if (config.endDate > symbolInfo.value.maxDate) return `End date after available data (${symbolInfo.value.maxDate})`
+  }
+  return null
+})
+
 const canRun = computed(() => {
   return (
-    config.startDate &&
-    config.endDate &&
+    !dateError.value &&
     props.generatedCode.length > 20 &&
     !isCompiling.value &&
     !compileError.value
