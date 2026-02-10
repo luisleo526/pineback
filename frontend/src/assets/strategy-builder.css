@@ -1,0 +1,614 @@
+/**
+ * Strategy Builder -- Premium Dark Theme
+ * Modern SaaS / Glassmorphism design system
+ */
+
+/* ═══════════════════════════════════════════════
+   Design Tokens
+   ═══════════════════════════════════════════════ */
+:root {
+  --sb-bg: #080a16;
+  --sb-surface: #0e1120;
+  --sb-surface-2: #141828;
+  --sb-surface-3: #1a1e32;
+  --sb-border: rgba(255, 255, 255, 0.06);
+  --sb-border-hover: rgba(255, 255, 255, 0.12);
+  --sb-text: #e2e8f0;
+  --sb-text-muted: #636980;
+  --sb-text-dim: #434860;
+  --sb-accent: #6366f1;
+  --sb-accent-blue: #3b82f6;
+  --sb-accent-glow: rgba(99, 102, 241, 0.25);
+  --sb-radius: 12px;
+  --sb-radius-sm: 8px;
+  --sb-radius-xs: 6px;
+  --sb-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ═══════════════════════════════════════════════
+   Glass Utilities
+   ═══════════════════════════════════════════════ */
+.glass {
+  background: rgba(20, 24, 40, 0.95);
+  border: 1px solid var(--sb-border);
+}
+
+.glass-card {
+  background: #141828;
+  border: 1px solid var(--sb-border);
+  border-radius: var(--sb-radius);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  transition: all var(--sb-transition);
+}
+
+.glass-card:hover {
+  border-color: var(--sb-border-hover);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--sb-border);
+  border-radius: var(--sb-radius-sm);
+  color: var(--sb-text);
+  transition: all var(--sb-transition);
+}
+
+.glass-input:focus {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 0 12px rgba(99, 102, 241, 0.08);
+}
+
+.glass-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  border-radius: var(--sb-radius-sm);
+  color: #a3a8bb;
+  transition: all var(--sb-transition);
+  cursor: pointer;
+}
+
+.glass-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border-color: var(--sb-border);
+}
+
+.glass-btn:active {
+  transform: scale(0.97);
+}
+
+.glass-btn-accent {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: white;
+  border: none;
+  border-radius: var(--sb-radius-sm);
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.3);
+  transition: all var(--sb-transition);
+  cursor: pointer;
+}
+
+.glass-btn-accent:hover {
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.45);
+  transform: translateY(-1px);
+}
+
+.glass-btn-accent:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════
+   Glow Effects
+   ═══════════════════════════════════════════════ */
+.glow-accent {
+  box-shadow: 0 0 20px var(--sb-accent-glow);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animated-gradient-border {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* ═══════════════════════════════════════════════
+   Typography
+   ═══════════════════════════════════════════════ */
+.strategy-builder-page {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+}
+
+/* ═══════════════════════════════════════════════
+   Scrollbar
+   ═══════════════════════════════════════════════ */
+.strategy-builder-page ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.strategy-builder-page ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.strategy-builder-page ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+
+.strategy-builder-page ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ═══════════════════════════════════════════════
+   Resize Handle
+   ═══════════════════════════════════════════════ */
+.resize-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  cursor: ns-resize;
+  z-index: 10;
+  transform: translateY(-50%);
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resize-handle::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 0;
+  right: 0;
+  height: 24px;
+}
+
+.resize-handle-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--sb-transition);
+}
+
+.resize-handle-inner::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--sb-border);
+  transition: all var(--sb-transition);
+}
+
+.resize-handle:hover .resize-handle-inner::before,
+.preview-resizing .resize-handle-inner::before {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--sb-accent), transparent);
+  box-shadow: 0 0 12px var(--sb-accent-glow);
+}
+
+.resize-grip {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 3px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--sb-surface-2);
+  border: 1px solid var(--sb-border);
+  transition: all var(--sb-transition);
+}
+
+.resize-handle:hover .resize-grip,
+.preview-resizing .resize-grip {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.resize-grip span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background var(--sb-transition);
+}
+
+.resize-handle:hover .resize-grip span,
+.preview-resizing .resize-grip span {
+  background: var(--sb-accent);
+}
+
+.preview-resizing {
+  transition: none !important;
+}
+
+.preview-resizing * {
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════
+   Vue Flow (legacy, kept for compatibility)
+   ═══════════════════════════════════════════════ */
+.vue-flow { background-color: var(--sb-bg) !important; }
+.vue-flow__background { background-color: var(--sb-bg) !important; }
+.vue-flow__attribution { display: none !important; }
+
+/* ═══════════════════════════════════════════════
+   PineScript Code Syntax (Material Ocean)
+   ═══════════════════════════════════════════════ */
+.pinescript-code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  tab-size: 4;
+}
+
+/* ═══════════════════════════════════════════════
+   Mobile Bottom Sheet
+   ═══════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .mobile-bottom-sheet {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    max-height: 70vh;
+    z-index: 40;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.6);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  }
+
+  .mobile-bottom-sheet.mobile-sheet-open {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .mobile-bottom-sheet.mobile-sheet-closed {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* Reset mobile-specific classes on desktop */
+@media (min-width: 768px) {
+  .md\:mobile-sheet-reset {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    top: auto !important;
+    /* width is controlled by right-panel-open / md:w-0 — do NOT override here */
+    max-height: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Right Panel — Dynamic Width
+   Scales proportionally with the viewport instead
+   of using fixed pixel widths.
+   ═══════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  .right-panel-open {
+    width: 35%;
+    min-width: 280px;
+    max-width: 480px;
+    flex-shrink: 0;
+  }
+}
+
+@media (min-width: 1280px) {
+  .right-panel-open {
+    width: 30%;
+    max-width: 520px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .right-panel-open {
+    width: 28%;
+    max-width: 560px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .right-panel-open {
+    width: 25%;
+    max-width: 600px;
+  }
+}
+
+@media (min-width: 2560px) {
+  .right-panel-open {
+    width: 23%;
+    max-width: 700px;
+  }
+}
+
+@media (min-width: 3840px) {
+  .right-panel-open {
+    width: 20%;
+    max-width: 880px;
+  }
+}
+
+@media (min-width: 5120px) {
+  .right-panel-open {
+    width: 18%;
+    max-width: 1060px;
+  }
+}
+
+@media (min-width: 7680px) {
+  .right-panel-open {
+    width: 16%;
+    max-width: 1400px;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Responsive — Mobile first
+   ═══════════════════════════════════════════════ */
+
+/* Extra-small phones (< 380px) */
+@media (max-width: 379px) {
+  .strategy-builder-page header {
+    padding-left: 0.375rem;
+    padding-right: 0.375rem;
+  }
+
+  .glass-btn,
+  .glass-btn-accent {
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0.25rem 0.375rem;
+    font-size: 0.65rem;
+  }
+
+  .glass-input {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+/* Small phones */
+@media (max-width: 639px) {
+  .strategy-builder-page {
+    flex-direction: column;
+  }
+
+  .strategy-builder-page ::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+
+  .pinescript-code {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+}
+
+/* Tablets (768-1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .glass-btn,
+  .glass-btn-accent {
+    min-height: 34px;
+    font-size: 0.75rem;
+  }
+
+  .pinescript-code {
+    font-size: 12.5px;
+  }
+}
+
+/* Standard laptops (1024-1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .pinescript-code {
+    font-size: 13px;
+  }
+}
+
+/* Large laptops / small desktops (1280-1535px) */
+@media (min-width: 1280px) {
+  .pinescript-code {
+    font-size: 13.5px;
+  }
+
+  .glass-btn,
+  .glass-btn-accent {
+    min-height: 36px;
+  }
+}
+
+/* Desktop HD (1536-1919px) */
+@media (min-width: 1536px) {
+  .pinescript-code {
+    font-size: 14px;
+    line-height: 1.75;
+  }
+}
+
+/* Full HD+ (1920-2559px) */
+@media (min-width: 1920px) {
+  .pinescript-code {
+    font-size: 14.5px;
+  }
+
+  .glass-btn,
+  .glass-btn-accent {
+    min-height: 38px;
+  }
+
+  .glass-input {
+    min-height: 38px;
+  }
+}
+
+/* 2.5K+ displays */
+@media (min-width: 2560px) {
+  :root {
+    --sb-radius: 16px;
+    --sb-radius-sm: 10px;
+    --sb-radius-xs: 8px;
+  }
+
+  .pinescript-code {
+    font-size: 15px;
+    line-height: 1.8;
+  }
+
+  .glass-card {
+    box-shadow: 0 6px 32px rgba(0, 0, 0, 0.45);
+  }
+
+  .glass-btn,
+  .glass-btn-accent {
+    min-height: 42px;
+    font-size: 0.875rem;
+  }
+
+  .glass-input {
+    min-height: 42px;
+    font-size: 0.875rem;
+  }
+
+  .strategy-builder-page ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+/* 4K displays */
+@media (min-width: 3840px) {
+  :root {
+    --sb-radius: 20px;
+    --sb-radius-sm: 14px;
+    --sb-radius-xs: 10px;
+  }
+
+  .pinescript-code {
+    font-size: 17px;
+  }
+
+  .resize-handle {
+    height: 16px;
+  }
+
+  .resize-grip {
+    padding: 6px 14px;
+  }
+
+  .resize-grip span {
+    width: 4px;
+    height: 4px;
+  }
+
+  .glass-btn,
+  .glass-btn-accent {
+    min-height: 48px;
+    font-size: 1rem;
+  }
+
+  .glass-input {
+    min-height: 48px;
+    font-size: 1rem;
+  }
+
+  .strategy-builder-page ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* 5K displays */
+@media (min-width: 5120px) {
+  :root {
+    --sb-radius: 24px;
+    --sb-radius-sm: 16px;
+    --sb-radius-xs: 12px;
+  }
+
+  .pinescript-code {
+    font-size: 20px;
+    line-height: 1.9;
+  }
+
+  .resize-handle {
+    height: 20px;
+  }
+
+  .glass-btn,
+  .glass-btn-accent {
+    min-height: 52px;
+    font-size: 1.125rem;
+  }
+
+  .glass-input {
+    min-height: 52px;
+    font-size: 1.125rem;
+  }
+}
+
+/* 8K displays */
+@media (min-width: 7680px) {
+  :root {
+    --sb-radius: 32px;
+    --sb-radius-sm: 20px;
+    --sb-radius-xs: 16px;
+  }
+
+  .pinescript-code {
+    font-size: 24px;
+    line-height: 2;
+  }
+
+  .resize-handle {
+    height: 24px;
+  }
+
+  .glass-btn,
+  .glass-btn-accent {
+    min-height: 64px;
+    font-size: 1.375rem;
+  }
+
+  .glass-input {
+    min-height: 64px;
+    font-size: 1.375rem;
+  }
+
+  .glass-card {
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.5);
+  }
+}
