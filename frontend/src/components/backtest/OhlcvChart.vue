@@ -109,41 +109,41 @@ class TradeMarkersRenderer {
     const chart = this._chart
     return {
       draw(target) {
-        const ctx = target.context
         if (!series || !chart) return
 
-        const timeScale = chart.timeScale()
+        target.useMediaCoordinateSpace(({ context: ctx }) => {
+          const timeScale = chart.timeScale()
 
-        for (const m of markers) {
-          const x = timeScale.timeToCoordinate(m.time)
-          const y = series.priceToCoordinate(m.price)
-          if (x === null || y === null) continue
+          for (const m of markers) {
+            const x = timeScale.timeToCoordinate(m.time)
+            const y = series.priceToCoordinate(m.price)
+            if (x === null || y === null) continue
 
-          const color = m.isLong ? '#2962FF' : '#e91e63'
-          const size = 6
-          const dir = m.isEntry ? 1 : -1  // 1 = pointing right, -1 = pointing left
+            const color = m.isLong ? '#2962FF' : '#e91e63'
+            const size = 6
 
-          ctx.save()
-          ctx.fillStyle = color
+            ctx.save()
+            ctx.fillStyle = color
 
-          // Draw horizontal triangle (pointing right for entry, left for exit)
-          ctx.beginPath()
-          if (dir === 1) {
-            // Right-pointing triangle: ▶
-            ctx.moveTo(x - size, y - size * 0.7)
-            ctx.lineTo(x + size, y)
-            ctx.lineTo(x - size, y + size * 0.7)
-          } else {
-            // Left-pointing triangle: ◀
-            ctx.moveTo(x + size, y - size * 0.7)
-            ctx.lineTo(x - size, y)
-            ctx.lineTo(x + size, y + size * 0.7)
+            // Draw horizontal triangle pointing right for entry, left for exit
+            ctx.beginPath()
+            if (m.isEntry) {
+              // ▶ right-pointing
+              ctx.moveTo(x - size, y - size * 0.7)
+              ctx.lineTo(x + size, y)
+              ctx.lineTo(x - size, y + size * 0.7)
+            } else {
+              // ◀ left-pointing
+              ctx.moveTo(x + size, y - size * 0.7)
+              ctx.lineTo(x - size, y)
+              ctx.lineTo(x + size, y + size * 0.7)
+            }
+            ctx.closePath()
+            ctx.fill()
+
+            ctx.restore()
           }
-          ctx.closePath()
-          ctx.fill()
-
-          ctx.restore()
-        }
+        })
       }
     }
   }
