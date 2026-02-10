@@ -263,6 +263,7 @@ defineExpose({ startTour, advanceIfActive })
 .shepherd-element {
   z-index: 9999 !important;
   max-width: 400px !important;
+  background: transparent !important;
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
