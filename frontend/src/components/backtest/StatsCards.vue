@@ -54,7 +54,7 @@ const stats = computed(() => {
     },
     {
       label: 'Annualized Volatility',
-      value: formatPct(r.annualized_volatility_pct),
+      value: r.annualized_volatility_pct != null ? `${r.annualized_volatility_pct.toFixed(2)}%` : '—',
       colorClass: 'text-white',
     },
     {
@@ -96,7 +96,7 @@ const stats = computed(() => {
     },
     {
       label: 'Win Rate',
-      value: formatPct(r.win_rate_pct),
+      value: r.win_rate_pct != null ? `${r.win_rate_pct.toFixed(2)}%` : '—',
       colorClass: winRateColor(r.win_rate_pct),
     },
     {

@@ -61,8 +61,8 @@ export function formatDateShort(isoString) {
 
 export function formatDuration(durationStr) {
   if (!durationStr || durationStr === 'NaT' || durationStr === 'nan') return '—'
-  // Parse pandas Timedelta string like "3 days 04:30:00"
-  const match = durationStr.match(/(?:(\d+)\s*days?\s*)?(\d{1,2}):(\d{2}):(\d{2})/)
+  // Parse pandas Timedelta string like "3 days 04:30:00" or "0 days 22:10:18.404907"
+  const match = durationStr.match(/(?:(\d+)\s*days?\s*)?(\d{1,2}):(\d{2}):(\d{2})(?:\.\d+)?/)
   if (!match) return durationStr
   const days = parseInt(match[1] || '0')
   const hours = parseInt(match[2])
