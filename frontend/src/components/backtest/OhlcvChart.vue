@@ -22,6 +22,8 @@ let candleChart = null
 let volumeChart = null
 let candleSeries = null
 let volumeSeries = null
+let longMarkerSeries = null
+let shortMarkerSeries = null
 let syncing = false
 let resizeObserver = null
 
@@ -65,38 +67,52 @@ function buildVolumeData() {
   }))
 }
 
-function buildMarkers() {
-  if (!props.tradeMarkers?.length) return []
-  return props.tradeMarkers
-    .map(m => {
-      const isLong = m.direction === 'Long' || m.direction === 'long'
-      const isEntry = m.is_entry
-      let position, color, shape, text
+function buildTradeSeriesData() {
+  // Split markers into long and short, each with data points at exact fill prices
+  // These will be rendered as invisible line series with inBar markers
+  const longData = []
+  const longMarkers = []
+  const shortData = []
+  const shortMarkers = []
 
-      // TradingView style: small triangles, minimal text
-      if (isLong && isEntry) {
-        position = 'belowBar'; color = '#2962FF'; shape = 'arrowUp'
-        text = 'Long'
-      } else if (isLong && !isEntry) {
-        position = 'aboveBar'; color = '#2962FF'; shape = 'arrowDown'
-        text = ''
-      } else if (!isLong && isEntry) {
-        position = 'aboveBar'; color = '#e91e63'; shape = 'arrowDown'
-        text = 'Short'
-      } else {
-        position = 'belowBar'; color = '#e91e63'; shape = 'arrowUp'
-        text = ''
-      }
-      return {
-        time: toUnix(m.timestamp),
-        position,
-        color,
-        shape,
-        text,
+  if (!props.tradeMarkers?.length) return { longData, longMarkers, shortData, shortMarkers }
+
+  for (const m of props.tradeMarkers) {
+    const isLong = m.direction === 'Long' || m.direction === 'long'
+    const isEntry = m.is_entry
+    const time = toUnix(m.timestamp)
+    const price = m.price
+
+    if (isLong) {
+      longData.push({ time, value: price })
+      longMarkers.push({
+        time,
+        position: 'inBar',
+        color: '#2962FF',
+        shape: isEntry ? 'arrowUp' : 'arrowDown',
+        text: isEntry ? 'Long' : '',
         size: 1,
-      }
-    })
-    .sort((a, b) => a.time - b.time)
+      })
+    } else {
+      shortData.push({ time, value: price })
+      shortMarkers.push({
+        time,
+        position: 'inBar',
+        color: '#e91e63',
+        shape: isEntry ? 'arrowDown' : 'arrowUp',
+        text: isEntry ? 'Short' : '',
+        size: 1,
+      })
+    }
+  }
+
+  // Sort all by time (required by lightweight-charts)
+  longData.sort((a, b) => a.time - b.time)
+  longMarkers.sort((a, b) => a.time - b.time)
+  shortData.sort((a, b) => a.time - b.time)
+  shortMarkers.sort((a, b) => a.time - b.time)
+
+  return { longData, longMarkers, shortData, shortMarkers }
 }
 
 function createCharts() {
@@ -120,6 +136,25 @@ function createCharts() {
     borderDownColor: '#ef4444',
     wickUpColor: '#22c55e',
     wickDownColor: '#ef4444',
+  })
+
+  // Hidden line series for trade markers at exact Y-axis prices
+  // Long trades: blue markers at exact fill price
+  longMarkerSeries = candleChart.addLineSeries({
+    color: 'transparent',
+    lineWidth: 0,
+    priceLineVisible: false,
+    lastValueVisible: false,
+    crosshairMarkerVisible: false,
+  })
+
+  // Short trades: pink markers at exact fill price
+  shortMarkerSeries = candleChart.addLineSeries({
+    color: 'transparent',
+    lineWidth: 0,
+    priceLineVisible: false,
+    lastValueVisible: false,
+    crosshairMarkerVisible: false,
   })
 
   volumeSeries = volumeChart.addHistogramSeries({
@@ -177,9 +212,15 @@ function setData() {
   candleSeries.setData(candleData)
   volumeSeries.setData(volumeData)
 
-  const markers = buildMarkers()
-  if (markers.length) {
-    candleSeries.setMarkers(markers)
+  // Trade markers on hidden line series at exact fill prices
+  const { longData, longMarkers, shortData, shortMarkers } = buildTradeSeriesData()
+  if (longMarkerSeries && longData.length) {
+    longMarkerSeries.setData(longData)
+    longMarkerSeries.setMarkers(longMarkers)
+  }
+  if (shortMarkerSeries && shortData.length) {
+    shortMarkerSeries.setData(shortData)
+    shortMarkerSeries.setMarkers(shortMarkers)
   }
 
   candleChart.timeScale().fitContent()
