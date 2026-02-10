@@ -79,7 +79,14 @@ TOOLS = [
 SESSION_CONFIG = {
     "type": "realtime",
     "model": "gpt-4o-mini-realtime-preview",
-    "voice": "ash",
+    "audio": {
+        "input": {
+            "transcription": {"model": "gpt-4o-mini-transcribe"},
+        },
+        "output": {
+            "voice": "ash",
+        },
+    },
     "instructions": (
         "You are a helpful trading strategy analyst. The user is viewing a "
         "backtest report and wants to discuss the results. Use the available "
@@ -90,9 +97,6 @@ SESSION_CONFIG = {
         "mentor having a conversation."
     ),
     "tools": TOOLS,
-    "input_audio_transcription": {
-        "model": "gpt-4o-mini-transcription",
-    },
 }
 
 
@@ -117,6 +121,7 @@ async def create_realtime_session(request: Request):
         raise HTTPException(status_code=400, detail="Empty SDP offer")
 
     # Build the multipart form: sdp + session config
+    # Must use files= (not data=) so httpx sends multipart/form-data
     async with httpx.AsyncClient(timeout=30.0) as client:
         try:
             resp = await client.post(
@@ -124,9 +129,9 @@ async def create_realtime_session(request: Request):
                 headers={
                     "Authorization": f"Bearer {OPENAI_API_KEY}",
                 },
-                data={
-                    "sdp": sdp_offer,
-                    "session": json.dumps(SESSION_CONFIG),
+                files={
+                    "sdp": (None, sdp_offer, "application/sdp"),
+                    "session": (None, json.dumps(SESSION_CONFIG), "application/json"),
                 },
             )
         except httpx.TimeoutException:
