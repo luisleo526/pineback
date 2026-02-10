@@ -125,8 +125,225 @@
       </div>
     </section>
 
-    <!-- Metrics -->
+    <!-- Magnifier Mode — Intra-Bar Detection -->
     <section class="relative z-10 py-24">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold mb-4">Magnifier Mode</h2>
+          <p class="text-dark-300 max-w-2xl mx-auto">
+            Standard backtests fill at bar close — missing what happens <em>inside</em> each candle.
+            Magnifier mode resamples higher-timeframe signals to 1-minute bars,
+            detecting realistic intra-bar entry and exit points.
+          </p>
+        </div>
+
+        <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <!-- LEFT: Standard Mode -->
+          <div class="rounded-xl border border-white/[0.06] bg-dark-800/30 backdrop-blur-sm p-6">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-2 h-2 rounded-full bg-dark-400"></div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-dark-300">Standard Mode</span>
+              <span class="ml-auto text-[10px] text-dark-500 font-mono">fill @ bar close</span>
+            </div>
+            <!-- Conceptual SVG chart -->
+            <svg viewBox="0 0 400 200" class="w-full" xmlns="http://www.w3.org/2000/svg">
+              <!-- grid -->
+              <line v-for="y in [40, 80, 120, 160]" :key="'sg'+y" x1="30" :y1="y" x2="380" :y2="y" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="30" y1="180" x2="380" y2="180" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+              <!-- price axis labels -->
+              <text x="8" y="44" fill="rgba(255,255,255,0.2)" font-size="9" font-family="monospace">460</text>
+              <text x="8" y="84" fill="rgba(255,255,255,0.2)" font-size="9" font-family="monospace">450</text>
+              <text x="8" y="124" fill="rgba(255,255,255,0.2)" font-size="9" font-family="monospace">440</text>
+              <text x="8" y="164" fill="rgba(255,255,255,0.2)" font-size="9" font-family="monospace">430</text>
+
+              <!-- 5 daily candles (wide) -->
+              <!-- Candle 1: bearish -->
+              <line x1="80" y1="50" x2="80" y2="140" stroke="rgba(239,68,68,0.6)" stroke-width="1"/>
+              <rect x="65" y="70" width="30" height="50" rx="2" fill="rgba(239,68,68,0.5)" stroke="rgba(239,68,68,0.7)" stroke-width="1"/>
+              <!-- Candle 2: bullish -->
+              <line x1="150" y1="60" x2="150" y2="150" stroke="rgba(34,197,94,0.6)" stroke-width="1"/>
+              <rect x="135" y="90" width="30" height="40" rx="2" fill="rgba(34,197,94,0.5)" stroke="rgba(34,197,94,0.7)" stroke-width="1"/>
+              <!-- Candle 3: bullish (signal bar) -->
+              <line x1="220" y1="45" x2="220" y2="120" stroke="rgba(34,197,94,0.6)" stroke-width="1"/>
+              <rect x="205" y="60" width="30" height="40" rx="2" fill="rgba(34,197,94,0.5)" stroke="rgba(34,197,94,0.7)" stroke-width="1"/>
+              <!-- Candle 4: bearish -->
+              <line x1="290" y1="55" x2="290" y2="135" stroke="rgba(239,68,68,0.6)" stroke-width="1"/>
+              <rect x="275" y="65" width="30" height="50" rx="2" fill="rgba(239,68,68,0.5)" stroke="rgba(239,68,68,0.7)" stroke-width="1"/>
+              <!-- Candle 5: bearish -->
+              <line x1="355" y1="70" x2="355" y2="160" stroke="rgba(239,68,68,0.6)" stroke-width="1"/>
+              <rect x="340" y="85" width="30" height="55" rx="2" fill="rgba(239,68,68,0.5)" stroke="rgba(239,68,68,0.7)" stroke-width="1"/>
+
+              <!-- Entry marker at bar 3 CLOSE (bottom of body = 100) -->
+              <circle cx="220" cy="60" r="5" fill="#6366f1" stroke="#818cf8" stroke-width="1.5"/>
+              <text x="220" y="52" text-anchor="middle" fill="#a5b4fc" font-size="9" font-weight="600">LE</text>
+
+              <!-- Exit marker at bar 5 CLOSE -->
+              <circle cx="355" cy="140" r="5" fill="#f59e0b" stroke="#fbbf24" stroke-width="1.5"/>
+              <text x="355" y="158" text-anchor="middle" fill="#fcd34d" font-size="9" font-weight="600">LX</text>
+
+              <!-- Dashed line connecting entry to exit -->
+              <line x1="220" y1="60" x2="355" y2="140" stroke="rgba(99,102,241,0.3)" stroke-width="1" stroke-dasharray="4 3"/>
+
+              <!-- Label: fills happen at close -->
+              <rect x="110" y="168" width="180" height="18" rx="4" fill="rgba(255,255,255,0.04)"/>
+              <text x="200" y="180" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="9" font-family="monospace">Entry &amp; exit at bar close only</text>
+            </svg>
+
+            <div class="mt-4 space-y-2">
+              <div class="flex items-center gap-2 text-[11px]">
+                <span class="w-3 h-3 rounded-full bg-indigo-500/40 border border-indigo-400 shrink-0"></span>
+                <span class="text-dark-300">Entry fills at the <span class="text-white font-medium">close</span> of the signal bar</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px]">
+                <span class="w-3 h-3 rounded-full bg-amber-500/40 border border-amber-400 shrink-0"></span>
+                <span class="text-dark-300">Exit fills at the <span class="text-white font-medium">close</span> of the exit bar</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px]">
+                <span class="text-red-400">&#x2717;</span>
+                <span class="text-dark-400">Misses price action within candles — fills can be unrealistic</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Magnifier Mode -->
+          <div class="rounded-xl border border-accent-500/20 bg-accent-500/[0.03] backdrop-blur-sm p-6">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-2 h-2 rounded-full bg-accent-400 animate-pulse"></div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-accent-300">Magnifier Mode</span>
+              <span class="ml-auto text-[10px] text-accent-500/70 font-mono">fill @ 1m intra-bar</span>
+            </div>
+            <!-- Conceptual SVG chart — zoomed into single daily bar, showing 1m candles -->
+            <svg viewBox="0 0 400 200" class="w-full" xmlns="http://www.w3.org/2000/svg">
+              <!-- grid -->
+              <line v-for="y in [40, 80, 120, 160]" :key="'mg'+y" x1="30" :y1="y" x2="380" :y2="y" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="30" y1="180" x2="380" y2="180" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+              <!-- price axis labels -->
+              <text x="8" y="44" fill="rgba(255,255,255,0.2)" font-size="9" font-family="monospace">460</text>
+              <text x="8" y="84" fill="rgba(255,255,255,0.2)" font-size="9" font-family="monospace">455</text>
+              <text x="8" y="124" fill="rgba(255,255,255,0.2)" font-size="9" font-family="monospace">450</text>
+              <text x="8" y="164" fill="rgba(255,255,255,0.2)" font-size="9" font-family="monospace">445</text>
+
+              <!-- Daily bar outline (ghost) -->
+              <rect x="40" y="42" width="340" height="130" rx="4" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1" stroke-dasharray="6 4"/>
+              <text x="210" y="36" text-anchor="middle" fill="rgba(255,255,255,0.15)" font-size="8" font-family="monospace">-- single daily bar, zoomed in --</text>
+
+              <!-- 1m candles inside (20 mini-candles showing price path) -->
+              <!-- Open ~120, drop to 150, recover to 60, dip, close ~85 -->
+              <!-- Group 1: opening dip -->
+              <rect x="48" y="115" width="6" height="12" rx="1" fill="rgba(239,68,68,0.5)" stroke="rgba(239,68,68,0.5)" stroke-width="0.5"/>
+              <rect x="58" y="122" width="6" height="10" rx="1" fill="rgba(239,68,68,0.5)" stroke="rgba(239,68,68,0.5)" stroke-width="0.5"/>
+              <rect x="68" y="130" width="6" height="14" rx="1" fill="rgba(239,68,68,0.5)" stroke="rgba(239,68,68,0.5)" stroke-width="0.5"/>
+              <rect x="78" y="140" width="6" height="10" rx="1" fill="rgba(239,68,68,0.5)" stroke="rgba(239,68,68,0.5)" stroke-width="0.5"/>
+              <rect x="88" y="145" width="6" height="8" rx="1" fill="rgba(239,68,68,0.5)" stroke="rgba(239,68,68,0.5)" stroke-width="0.5"/>
+
+              <!-- ENTRY here: price crosses signal threshold -->
+              <rect x="98" y="142" width="6" height="10" rx="1" fill="rgba(34,197,94,0.5)" stroke="rgba(34,197,94,0.6)" stroke-width="0.5"/>
+
+              <!-- Group 2: recovery rally -->
+              <rect x="108" y="132" width="6" height="12" rx="1" fill="rgba(34,197,94,0.5)" stroke="rgba(34,197,94,0.6)" stroke-width="0.5"/>
+              <rect x="118" y="118" width="6" height="16" rx="1" fill="rgba(34,197,94,0.5)" stroke="rgba(34,197,94,0.6)" stroke-width="0.5"/>
+              <rect x="128" y="102" width="6" height="18" rx="1" fill="rgba(34,197,94,0.5)" stroke="rgba(34,197,94,0.6)" stroke-width="0.5"/>
+              <rect x="138" y="88" width="6" height="16" rx="1" fill="rgba(34,197,94,0.5)" stroke="rgba(34,197,94,0.6)" stroke-width="0.5"/>
+              <rect x="148" y="76" width="6" height="14" rx="1" fill="rgba(34,197,94,0.5)" stroke="rgba(34,197,94,0.6)" stroke-width="0.5"/>
+              <rect x="158" y="65" width="6" height="13" rx="1" fill="rgba(34,197,94,0.5)" stroke="rgba(34,197,94,0.6)" stroke-width="0.5"/>
+              <rect x="168" y="56" width="6" height="11" rx="1" fill="rgba(34,197,94,0.5)" stroke="rgba(34,197,94,0.6)" stroke-width="0.5"/>
+              <rect x="178" y="50" width="6" height="9" rx="1" fill="rgba(34,197,94,0.5)" stroke="rgba(34,197,94,0.6)" stroke-width="0.5"/>
+
+              <!-- Peak & pullback -->
+              <rect x="188" y="48" width="6" height="10" rx="1" fill="rgba(34,197,94,0.5)" stroke="rgba(34,197,94,0.6)" stroke-width="0.5"/>
+              <rect x="198" y="52" width="6" height="8" rx="1" fill="rgba(239,68,68,0.5)" stroke="rgba(239,68,68,0.5)" stroke-width="0.5"/>
+              <rect x="208" y="58" width="6" height="10" rx="1" fill="rgba(239,68,68,0.5)" stroke="rgba(239,68,68,0.5)" stroke-width="0.5"/>
+              <rect x="218" y="65" width="6" height="12" rx="1" fill="rgba(239,68,68,0.5)" stroke="rgba(239,68,68,0.5)" stroke-width="0.5"/>
+
+              <!-- EXIT here: profit target hit -->
+              <rect x="228" y="70" width="6" height="10" rx="1" fill="rgba(239,68,68,0.5)" stroke="rgba(239,68,68,0.5)" stroke-width="0.5"/>
+
+              <!-- Remaining bars after exit -->
+              <rect x="238" y="76" width="6" height="12" rx="1" fill="rgba(239,68,68,0.4)" stroke="rgba(239,68,68,0.35)" stroke-width="0.5"/>
+              <rect x="248" y="82" width="6" height="10" rx="1" fill="rgba(34,197,94,0.35)" stroke="rgba(34,197,94,0.35)" stroke-width="0.5"/>
+              <rect x="258" y="78" width="6" height="8" rx="1" fill="rgba(34,197,94,0.35)" stroke="rgba(34,197,94,0.35)" stroke-width="0.5"/>
+              <rect x="268" y="74" width="6" height="10" rx="1" fill="rgba(34,197,94,0.35)" stroke="rgba(34,197,94,0.35)" stroke-width="0.5"/>
+
+              <!-- More closing bars -->
+              <rect x="278" y="78" width="6" height="8" rx="1" fill="rgba(239,68,68,0.35)" stroke="rgba(239,68,68,0.35)" stroke-width="0.5"/>
+              <rect x="288" y="82" width="6" height="10" rx="1" fill="rgba(239,68,68,0.35)" stroke="rgba(239,68,68,0.35)" stroke-width="0.5"/>
+              <rect x="298" y="78" width="6" height="12" rx="1" fill="rgba(34,197,94,0.35)" stroke="rgba(34,197,94,0.35)" stroke-width="0.5"/>
+              <rect x="308" y="72" width="6" height="9" rx="1" fill="rgba(34,197,94,0.35)" stroke="rgba(34,197,94,0.35)" stroke-width="0.5"/>
+              <rect x="318" y="75" width="6" height="7" rx="1" fill="rgba(239,68,68,0.35)" stroke="rgba(239,68,68,0.35)" stroke-width="0.5"/>
+              <rect x="328" y="80" width="6" height="8" rx="1" fill="rgba(239,68,68,0.35)" stroke="rgba(239,68,68,0.35)" stroke-width="0.5"/>
+              <rect x="338" y="84" width="6" height="6" rx="1" fill="rgba(34,197,94,0.35)" stroke="rgba(34,197,94,0.35)" stroke-width="0.5"/>
+              <rect x="348" y="80" width="6" height="8" rx="1" fill="rgba(34,197,94,0.35)" stroke="rgba(34,197,94,0.35)" stroke-width="0.5"/>
+              <rect x="358" y="83" width="6" height="7" rx="1" fill="rgba(239,68,68,0.35)" stroke="rgba(239,68,68,0.35)" stroke-width="0.5"/>
+              <rect x="368" y="86" width="6" height="6" rx="1" fill="rgba(239,68,68,0.35)" stroke="rgba(239,68,68,0.35)" stroke-width="0.5"/>
+
+              <!-- Entry marker -->
+              <circle cx="101" cy="142" r="5" fill="#6366f1" stroke="#818cf8" stroke-width="1.5"/>
+              <text x="101" y="162" text-anchor="middle" fill="#a5b4fc" font-size="9" font-weight="600">LE</text>
+
+              <!-- Exit marker -->
+              <circle cx="231" cy="70" r="5" fill="#f59e0b" stroke="#fbbf24" stroke-width="1.5"/>
+              <text x="231" y="62" text-anchor="middle" fill="#fcd34d" font-size="9" font-weight="600">LX</text>
+
+              <!-- Profit region shading -->
+              <rect x="98" y="70" width="136" height="72" rx="3" fill="rgba(34,197,94,0.06)" stroke="rgba(34,197,94,0.15)" stroke-width="0.5" stroke-dasharray="3 2"/>
+
+              <!-- Dashed line connecting entry to exit -->
+              <line x1="101" y1="142" x2="231" y2="70" stroke="rgba(99,102,241,0.4)" stroke-width="1" stroke-dasharray="4 3"/>
+
+              <!-- Label: intra-bar fills -->
+              <rect x="100" y="168" width="200" height="18" rx="4" fill="rgba(139,92,246,0.08)"/>
+              <text x="200" y="180" text-anchor="middle" fill="rgba(167,139,250,0.6)" font-size="9" font-family="monospace">Intra-bar entry &amp; exit on 1m bars</text>
+            </svg>
+
+            <div class="mt-4 space-y-2">
+              <div class="flex items-center gap-2 text-[11px]">
+                <span class="w-3 h-3 rounded-full bg-indigo-500/40 border border-indigo-400 shrink-0"></span>
+                <span class="text-dark-300">Entry at the <span class="text-accent-400 font-medium">exact 1m bar</span> where signal triggers</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px]">
+                <span class="w-3 h-3 rounded-full bg-amber-500/40 border border-amber-400 shrink-0"></span>
+                <span class="text-dark-300">Exit at the <span class="text-accent-400 font-medium">exact 1m bar</span> where condition is met</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px]">
+                <span class="text-green-400">&#x2713;</span>
+                <span class="text-dark-300">Captures <span class="text-white font-medium">intra-bar price path</span> — realistic limit/stop fills</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- How it works callout -->
+        <div class="max-w-5xl mx-auto mt-8 rounded-xl border border-white/[0.06] bg-dark-800/30 backdrop-blur-sm p-6">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-lg bg-accent-500/10 flex items-center justify-center shrink-0 mt-0.5">
+              <svg class="w-5 h-5 text-accent-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM13.5 10.5h-6" /></svg>
+            </div>
+            <div>
+              <h4 class="text-sm font-semibold mb-2">How Magnifier Mode Works</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-[11px] text-dark-300">
+                <div class="flex gap-2">
+                  <span class="text-accent-400 font-bold shrink-0">1.</span>
+                  <span>Strategy signals are computed on the <span class="text-white">higher timeframe</span> (e.g. daily bars) — same as standard mode.</span>
+                </div>
+                <div class="flex gap-2">
+                  <span class="text-accent-400 font-bold shrink-0">2.</span>
+                  <span>When a signal fires, the engine <span class="text-white">zooms into 1-minute bars</span> within that candle to find the precise fill point.</span>
+                </div>
+                <div class="flex gap-2">
+                  <span class="text-accent-400 font-bold shrink-0">3.</span>
+                  <span>Result: fills reflect <span class="text-white">actual intra-bar prices</span>, not just the bar's close — critical for stop-loss and limit orders.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Metrics -->
+    <section class="relative z-10 py-24 bg-dark-900/40">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-16">
           <h2 class="text-3xl sm:text-4xl font-bold mb-4">Computed Metrics</h2>
