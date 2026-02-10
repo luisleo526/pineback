@@ -142,6 +142,21 @@ class TradeMarkersRenderer {
             ctx.closePath()
             ctx.fill()
 
+            // Label: LE/LX/SE/SX next to the triangle
+            const label = (m.isLong ? 'L' : 'S') + (m.isEntry ? 'E' : 'X')
+            ctx.font = '9px Inter, sans-serif'
+            ctx.fillStyle = color
+            ctx.textBaseline = 'middle'
+            if (m.isEntry) {
+              // Label to the left of the triangle
+              ctx.textAlign = 'right'
+              ctx.fillText(label, x - s * 2 - 3, y)
+            } else {
+              // Label to the right of the triangle
+              ctx.textAlign = 'left'
+              ctx.fillText(label, x + s * 2 + 3, y)
+            }
+
             ctx.restore()
           }
         })
