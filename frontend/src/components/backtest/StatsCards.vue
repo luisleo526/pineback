@@ -35,27 +35,32 @@ const stats = computed(() => {
   const r = props.result
   if (!r) return []
 
+  const netProfit = (r.final_value != null && r.initial_capital != null)
+    ? r.final_value - r.initial_capital
+    : null
+
   return [
     // Row 1
     {
       label: 'Net Profit',
-      value: formatPnl(r.net_profit ?? r.final_value - r.initial_capital),
+      value: formatPnl(netProfit),
       subtitle: formatPct(r.total_return_pct),
-      colorClass: pnlColor(r.net_profit ?? (r.final_value - r.initial_capital)),
+      colorClass: pnlColor(netProfit),
     },
     {
       label: 'CAGR',
-      value: formatPct(r.cagr),
-      colorClass: pnlColor(r.cagr),
+      value: formatPct(r.annualized_return_pct),
+      colorClass: pnlColor(r.annualized_return_pct),
     },
     {
       label: 'Annualized Volatility',
-      value: formatPct(r.annualized_volatility),
+      value: formatPct(r.annualized_volatility_pct),
       colorClass: 'text-white',
     },
     {
       label: 'Max Drawdown',
-      value: formatPct(r.max_drawdown_pct),
+      value: formatPct(r.max_drawdown_pct != null ? -Math.abs(r.max_drawdown_pct) : null),
+      subtitle: formatDuration(r.max_drawdown_duration),
       colorClass: 'text-red-400',
     },
 
@@ -96,36 +101,34 @@ const stats = computed(() => {
     },
     {
       label: 'Best Trade',
-      value: formatPnl(r.best_trade),
-      subtitle: formatPct(r.best_trade_pct),
+      value: formatPct(r.best_trade_pct),
       colorClass: 'text-green-400',
     },
     {
       label: 'Worst Trade',
-      value: formatPnl(r.worst_trade),
-      subtitle: formatPct(r.worst_trade_pct),
+      value: formatPct(r.worst_trade_pct),
       colorClass: 'text-red-400',
     },
 
     // Row 4
     {
       label: 'Avg Winning Trade',
-      value: formatPnl(r.avg_winning_trade),
+      value: formatPct(r.avg_winning_trade_pct),
       colorClass: 'text-green-400',
     },
     {
       label: 'Avg Losing Trade',
-      value: formatPnl(r.avg_losing_trade),
+      value: formatPct(r.avg_losing_trade_pct),
       colorClass: 'text-red-400',
     },
     {
       label: 'Avg Win Duration',
-      value: formatDuration(r.avg_win_duration),
+      value: formatDuration(r.avg_winning_duration),
       colorClass: 'text-white/70',
     },
     {
       label: 'Avg Loss Duration',
-      value: formatDuration(r.avg_loss_duration),
+      value: formatDuration(r.avg_losing_duration),
       colorClass: 'text-white/70',
     },
   ]
