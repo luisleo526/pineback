@@ -5,6 +5,7 @@
       <button
         v-for="signal in signalList"
         :key="signal.id"
+        :data-signal="signal.id"
         @click="activeSignal = signal.id"
         :class="[
           'flex-1 min-w-0 px-2 sm:px-4 py-2.5 text-xs sm:text-xs font-medium transition-all relative whitespace-nowrap rounded-lg',

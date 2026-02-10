@@ -23,8 +23,8 @@ function createTour() {
       classes: 'shepherd-theme-custom',
       scrollTo: { behavior: 'smooth', block: 'center' },
       cancelIcon: { enabled: true },
-      modalOverlayOpeningPadding: 12,
-      modalOverlayOpeningRadius: 10,
+      modalOverlayOpeningPadding: 16,
+      modalOverlayOpeningRadius: 12,
       popperOptions: {
         modifiers: [
           { name: 'offset', options: { offset: [0, 16] } },
@@ -369,6 +369,20 @@ defineExpose({ startTour, advanceIfActive })
 
 .shepherd-modal-overlay-container {
   z-index: 9998 !important;
+}
+
+/* Dark overlay for strong spotlight effect */
+.shepherd-modal-overlay-container .shepherd-modal-mask-rect {
+  fill: rgba(0, 0, 0, 0.75) !important;
+}
+
+.shepherd-modal-overlay-container svg {
+  opacity: 1 !important;
+}
+
+.shepherd-modal-overlay-container path {
+  fill: rgba(0, 0, 0, 0.75) !important;
+  fill-rule: evenodd !important;
 }
 
 /* Highlighted target element */
