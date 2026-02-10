@@ -184,8 +184,9 @@ function disconnect() {
     audioElement = null
   }
 
-  // Clear pending calls
+  // Clear pending calls and resolved tracking
   Object.keys(pendingCalls).forEach((k) => delete pendingCalls[k])
+  resolvedCalls.clear()
 
   aiSpeaking.value = false
   lastTranscript.value = ''
@@ -215,6 +216,11 @@ function onDataChannelMessage(e) {
     return
   }
 
+  // Log all events for debugging (remove in production)
+  if (event.type !== 'response.audio.delta') {
+    console.log('[realtime]', event.type, event)
+  }
+
   switch (event.type) {
     // ── Audio activity tracking ──
     case 'output_audio_buffer.speech_started':
@@ -231,16 +237,24 @@ function onDataChannelMessage(e) {
       }
       break
 
-    // ── Function call accumulation ──
+    // ── Function call: accumulate streamed arguments ──
     case 'response.function_call_arguments.delta':
       accumulateFunctionCallDelta(event)
       break
 
+    // ── Function call: arguments complete, resolve immediately ──
     case 'response.function_call_arguments.done':
       handleFunctionCallDone(event)
       break
 
-    // ── Response completion ──
+    // ── Per-item completion (used to track function call items) ──
+    case 'response.output_item.done':
+      if (event.item?.type === 'function_call') {
+        handleOutputItemFunctionCall(event.item)
+      }
+      break
+
+    // ── Full response completion ──
     case 'response.done':
       handleResponseDone(event)
       break
@@ -257,11 +271,17 @@ function onDataChannelMessage(e) {
 
 // ── Function call handling ────────────────────────────────────
 
+// Track which call_ids we've already resolved (avoid double-handling)
+const resolvedCalls = new Set()
+
 function accumulateFunctionCallDelta(event) {
   const callId = event.call_id
   if (!callId) return
   if (!pendingCalls[callId]) {
-    pendingCalls[callId] = { name: '', arguments_str: '' }
+    pendingCalls[callId] = { name: event.name || '', arguments_str: '' }
+  }
+  if (event.name) {
+    pendingCalls[callId].name = event.name
   }
   if (event.delta) {
     pendingCalls[callId].arguments_str += event.delta
@@ -270,12 +290,34 @@ function accumulateFunctionCallDelta(event) {
 
 function handleFunctionCallDone(event) {
   const callId = event.call_id
-  const name = event.name || pendingCalls[callId]?.name
+  if (!callId || resolvedCalls.has(callId)) return
+  resolvedCalls.add(callId)
+
+  const name = event.name || pendingCalls[callId]?.name || ''
   const argsStr = event.arguments || pendingCalls[callId]?.arguments_str || '{}'
 
   // Clean up pending
   delete pendingCalls[callId]
 
+  _resolveFunctionAndSend(callId, name, argsStr)
+}
+
+/**
+ * Fallback: handle function calls via response.output_item.done
+ * in case response.function_call_arguments.done didn't fire or
+ * was missed.
+ */
+function handleOutputItemFunctionCall(item) {
+  const callId = item.call_id
+  if (!callId || resolvedCalls.has(callId)) return
+  resolvedCalls.add(callId)
+
+  delete pendingCalls[callId]
+
+  _resolveFunctionAndSend(callId, item.name || '', item.arguments || '{}')
+}
+
+function _resolveFunctionAndSend(callId, name, argsStr) {
   let args = {}
   try {
     args = JSON.parse(argsStr)
@@ -283,8 +325,8 @@ function handleFunctionCallDone(event) {
     args = {}
   }
 
-  // Resolve the function call from local data
   const output = resolveFunction(name, args)
+  console.log('[realtime] function resolved:', name, '->', output)
 
   // Send the function output back
   sendEvent({
@@ -302,8 +344,11 @@ function handleResponseDone(event) {
   const output = event.response?.output || []
   const hasFunctionCalls = output.some((item) => item.type === 'function_call')
   if (hasFunctionCalls) {
-    // Trigger the model to continue after processing function results
-    sendEvent({ type: 'response.create' })
+    // Small delay to ensure all function_call_output items are sent first
+    setTimeout(() => {
+      console.log('[realtime] triggering response.create after function calls')
+      sendEvent({ type: 'response.create' })
+    }, 100)
   }
 }
 
