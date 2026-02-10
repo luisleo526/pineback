@@ -52,13 +52,37 @@
       "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
     },
     "shortEntry": {
-      "enabled": false,
-      "groups": [],
+      "enabled": true,
+      "groups": [
+        {
+          "id": "sg_se1",
+          "conditions": [
+            {
+              "id": "sc_se1a",
+              "left": { "type": "variable", "variableId": "var_stochK" },
+              "operator": "crossunder",
+              "right": { "type": "variable", "variableId": "var_stochD" }
+            }
+          ]
+        }
+      ],
       "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
     },
     "shortExit": {
-      "enabled": false,
-      "groups": [],
+      "enabled": true,
+      "groups": [
+        {
+          "id": "sg_sx1",
+          "conditions": [
+            {
+              "id": "sc_sx1a",
+              "left": { "type": "variable", "variableId": "var_stochK" },
+              "operator": "crossover",
+              "right": { "type": "variable", "variableId": "var_stochD" }
+            }
+          ]
+        }
+      ],
       "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
     }
   },

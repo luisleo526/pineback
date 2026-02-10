@@ -64,13 +64,55 @@
       "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
     },
     "shortEntry": {
-      "enabled": false,
-      "groups": [],
+      "enabled": true,
+      "groups": [
+        {
+          "id": "sg_se1",
+          "conditions": [
+            {
+              "id": "sc_se1a",
+              "left": { "type": "variable", "variableId": "var_myHMA" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_myWMA" }
+            },
+            {
+              "id": "sc_se1b",
+              "left": { "type": "variable", "variableId": "var_myHMA" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_myRMA" }
+            },
+            {
+              "id": "sc_se1c",
+              "left": { "type": "variable", "variableId": "var_myHMA" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_myALMA" }
+            }
+          ]
+        }
+      ],
       "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
     },
     "shortExit": {
-      "enabled": false,
-      "groups": [],
+      "enabled": true,
+      "groups": [
+        {
+          "id": "sg_sx1",
+          "conditions": [
+            {
+              "id": "sc_sx1a",
+              "left": { "type": "variable", "variableId": "var_myHMA" },
+              "operator": "gt",
+              "right": { "type": "variable", "variableId": "var_myWMA" }
+            },
+            {
+              "id": "sc_sx1b",
+              "left": { "type": "variable", "variableId": "var_myHMA" },
+              "operator": "gt",
+              "right": { "type": "variable", "variableId": "var_myRMA" }
+            }
+          ]
+        }
+      ],
       "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
     }
   },

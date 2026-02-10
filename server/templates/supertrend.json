@@ -46,13 +46,37 @@
       "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
     },
     "shortEntry": {
-      "enabled": false,
-      "groups": [],
+      "enabled": true,
+      "groups": [
+        {
+          "id": "sg_se1",
+          "conditions": [
+            {
+              "id": "sc_se1a",
+              "left": { "type": "variable", "variableId": "var_stDirection" },
+              "operator": "eq",
+              "right": { "type": "constant", "value": 1 }
+            }
+          ]
+        }
+      ],
       "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
     },
     "shortExit": {
-      "enabled": false,
-      "groups": [],
+      "enabled": true,
+      "groups": [
+        {
+          "id": "sg_sx1",
+          "conditions": [
+            {
+              "id": "sc_sx1a",
+              "left": { "type": "variable", "variableId": "var_stDirection" },
+              "operator": "eq",
+              "right": { "type": "constant", "value": -1 }
+            }
+          ]
+        }
+      ],
       "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
     }
   },

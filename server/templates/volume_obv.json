@@ -63,13 +63,54 @@
       "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
     },
     "shortEntry": {
-      "enabled": false,
-      "groups": [],
+      "enabled": true,
+      "groups": [
+        {
+          "id": "sg_se1",
+          "conditions": [
+            {
+              "id": "sc_se1a",
+              "left": { "type": "variable", "variableId": "var_myOBV" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_obvSMA" }
+            },
+            {
+              "id": "sc_se1b",
+              "left": { "type": "price", "source": "close" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_myVWAP" }
+            }
+          ]
+        }
+      ],
       "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
     },
     "shortExit": {
-      "enabled": false,
-      "groups": [],
+      "enabled": true,
+      "groups": [
+        {
+          "id": "sg_sx1",
+          "conditions": [
+            {
+              "id": "sc_sx1a",
+              "left": { "type": "variable", "variableId": "var_myOBV" },
+              "operator": "gt",
+              "right": { "type": "variable", "variableId": "var_obvSMA" }
+            }
+          ]
+        },
+        {
+          "id": "sg_sx2",
+          "conditions": [
+            {
+              "id": "sc_sx2a",
+              "left": { "type": "price", "source": "close" },
+              "operator": "gt",
+              "right": { "type": "variable", "variableId": "var_myVWAP" }
+            }
+          ]
+        }
+      ],
       "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
     }
   },
