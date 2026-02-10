@@ -225,16 +225,13 @@ function createTour() {
     attachTo: { element: '[data-signal="longExit"]', on: 'bottom' },
     advanceOn: { selector: '[data-signal="longExit"]', event: 'click' },
     buttons: [],
-    when: _multiSpotlight([
-      '[data-signal="longEntry"]',
-      '[data-signal="longExit"]',
-    ]),
+    when: _multiSpotlight(['[data-signal="longExit"]']),
   })
 
   // Step 5: Inspect condition row (read-only)
-  // Condition rows are in the mid-scrollable area → tooltip ABOVE
-  // so the full row content stays visible. Extra spotlight on the
-  // active signal tab for context.
+  // Attach to the signal content area and place tooltip on the RIGHT
+  // so the entire left-side condition panel remains fully visible.
+  // Extra spotlight on the active tab and first condition row.
   tour.addStep({
     id: 'inspect-condition',
     title: 'Understanding Conditions',
@@ -248,7 +245,7 @@ function createTour() {
       <p class="mt-2 text-sm opacity-70">Here, <em>macdLine crossunder signalLine</em> triggers a long exit.</p>
       <p class="text-xs opacity-40 mt-2">Step 5 of 12</p>
     `,
-    attachTo: { element: '.condition-row', on: 'top' },
+    attachTo: { element: '.signal-condition-builder .overflow-y-auto', on: 'right' },
     buttons: [
       { text: '← Back', action: tour.back, classes: 'shepherd-button-secondary' },
       { text: 'Next →', action: tour.next, classes: 'shepherd-button-primary' },
