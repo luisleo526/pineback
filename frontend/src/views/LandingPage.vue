@@ -680,7 +680,7 @@ const techStack = [
 
 // Assumptions
 const assumptions = [
-  { title: 'SPY Only (by default)', detail: 'The system ingests SPY OHLCV data from Yahoo Finance. The architecture supports multiple symbols via the DataSource protocol, but SPY is the default for the interview demo.' },
+  { title: 'SPY Only (by default)', detail: 'SPY 1-minute OHLCV data sourced from Kaggle (kaggle.com/datasets/rockinbrock/spy-1-minute-data). The architecture supports multiple symbols via the DataSource protocol, but SPY is the default for the interview demo.' },
   { title: 'Stateless Strategies', detail: 'Strategies are pure functions of price data — no portfolio state carryover between bars. This matches the PineScript execution model and simplifies the compiler.' },
   { title: 'Configurable Commission & Slippage', detail: 'Default: 0.1% commission, 0.05% slippage per trade. Both are configurable in the backtest config panel to model different broker scenarios.' },
   { title: 'Magnifier vs Standard Mode', detail: 'Standard mode fills at bar close. Magnifier mode resamples higher-TF signals to 1-min candles for realistic intra-bar execution — critical for accurate limit/stop orders.' },

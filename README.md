@@ -131,7 +131,7 @@ Requires: AWS account with a Route 53 hosted zone and an EC2 key pair. All resou
 
 ## Key Assumptions
 
-- **SPY is the only symbol** — ~1.4M 1-minute bars from 2008-01-22 to 2021-05-06
+- **SPY is the only symbol** — ~1.4M 1-minute bars from 2008-01-22 to 2021-05-06, sourced from [Kaggle](https://www.kaggle.com/datasets/rockinbrock/spy-1-minute-data)
 - **Strategies are stateless** — no persistent bar-to-bar variables (`var`/`varip`)
 - **Configurable execution costs** — commission (default 0.1%), slippage (default 0.05%), order size (default 100% equity)
 - **Magnifier mode** gives realistic intra-bar fills; standard mode fills at bar close
@@ -157,7 +157,7 @@ Requires: AWS account with a Route 53 hosted zone and an EC2 key pair. All resou
 | **Backend** | Python 3.11, FastAPI, SQLAlchemy, psycopg2, vectorbt, TimescaleDB, PgBouncer |
 | **Frontend** | Vue 3, Vite, Tailwind CSS, lightweight-charts (Series Primitives), shepherd.js |
 | **Infrastructure** | Docker, Terraform, AWS EC2, Route 53, nginx, Let's Encrypt |
-| **Data** | SPY 1-minute OHLCV, 2008-2021 (~1.4M candles, ~120MB CSV via Git LFS) |
+| **Data** | [SPY 1-minute OHLCV from Kaggle](https://www.kaggle.com/datasets/rockinbrock/spy-1-minute-data), 2008-2021 (~1.4M candles, ~120MB CSV via Git LFS) |
 
 ## Bonus Features
 
