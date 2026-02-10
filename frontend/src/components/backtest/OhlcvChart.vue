@@ -93,7 +93,7 @@ function buildTradeSeriesData() {
         color: '#2962FF',
         shape: isEntry ? 'circle' : 'square',
         text: isEntry ? 'L' : '',
-        size: 0,
+        size: 2,
       })
     } else {
       shortData.push({ time, value: price })
@@ -103,7 +103,7 @@ function buildTradeSeriesData() {
         color: '#e91e63',
         shape: isEntry ? 'circle' : 'square',
         text: isEntry ? 'S' : '',
-        size: 0,
+        size: 2,
       })
     }
   }
@@ -216,6 +216,7 @@ function setData() {
 
   // Trade markers on hidden line series at exact fill prices
   const { longData, longMarkers, shortData, shortMarkers } = buildTradeSeriesData()
+  console.log(`Trade markers: ${longData.length} long, ${shortData.length} short`)
   if (longMarkerSeries && longData.length) {
     longMarkerSeries.setData(longData)
     longMarkerSeries.setMarkers(longMarkers)
