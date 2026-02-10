@@ -126,7 +126,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import StrategyBuilderPage from '../components/strategy-builder/StrategyBuilderPage.vue'
 import BacktestConfigPanel from '../components/backtest/BacktestConfigPanel.vue'
 import BacktestJobTracker from '../components/backtest/BacktestJobTracker.vue'
@@ -170,6 +170,23 @@ function onStrategyChanged(data) {
   }
 }
 
+// Poll the builder's exposed generatedCode since Vue ref proxying
+// doesn't propagate computed reactivity from child instances
+let codeSync = null
+onMounted(() => {
+  codeSync = setInterval(() => {
+    if (builderRef.value?.generatedCode) {
+      const code = builderRef.value.generatedCode
+      if (code !== generatedCode.value) {
+        generatedCode.value = code
+      }
+    }
+  }, 500)
+})
+onUnmounted(() => {
+  if (codeSync) clearInterval(codeSync)
+})
+
 // ── Backtest panel toggle ─────────────────────────────────────
 function toggleBacktestPanel() {
   showBacktestPanel.value = !showBacktestPanel.value
@@ -177,10 +194,14 @@ function toggleBacktestPanel() {
 
 // ── Backtest execution ────────────────────────────────────────
 function handleRunBacktest(config) {
+  console.log('handleRunBacktest called:', config)
+  console.log('jobTrackerRef:', jobTrackerRef.value)
   // BacktestConfigPanel emits this with the full config payload.
   // Forward it to BacktestJobTracker which handles API submission + polling.
   if (jobTrackerRef.value && jobTrackerRef.value.submitBacktest) {
     jobTrackerRef.value.submitBacktest(config)
+  } else {
+    console.error('jobTrackerRef not available or submitBacktest not exposed')
   }
 }
 
