@@ -198,8 +198,8 @@ function createTour() {
   })
 
   // Step 3: Select MACD from the open dropdown (action)
-  // Tooltip goes RIGHT of the dropdown button. Extra spotlight
-  // on the teleported dropdown menu so the user can see both.
+  // Spotlight only the MACD Crossover button in the dropdown list.
+  // Tooltip attaches to it on the right so the item stays visible.
   tour.addStep({
     id: 'select-template',
     title: 'Select MACD Crossover',
@@ -207,9 +207,8 @@ function createTour() {
       <p>Click <strong>"MACD Crossover"</strong> from the list to load it into the builder.</p>
       <p class="text-xs opacity-40 mt-2">Step 3 of 12 · Click a template to continue</p>
     `,
-    attachTo: { element: '#template-dropdown', on: 'right' },
+    attachTo: { element: '[data-template="MACD Crossover"]', on: 'right' },
     buttons: [],
-    when: _multiSpotlight(['.fixed.z-\\[9999\\].w-64']),
   })
 
   // Step 4: Click Long Exit tab (action)

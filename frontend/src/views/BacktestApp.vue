@@ -39,6 +39,7 @@
                 <button
                   v-for="t in templates"
                   :key="t.filename"
+                  :data-template="t.name"
                   @click="loadTemplate(t)"
                   class="w-full text-left px-3 py-2.5 text-xs text-white/70 hover:text-white hover:bg-white/[0.06] rounded-lg transition-all"
                 >
