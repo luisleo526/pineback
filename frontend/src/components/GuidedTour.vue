@@ -267,15 +267,15 @@ defineExpose({ startTour, advanceIfActive })
 
 .shepherd-element .shepherd-content {
   background: #141828 !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: none !important;
   border-radius: 14px !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(99, 102, 241, 0.2) !important;
   padding: 0 !important;
 }
 
 .shepherd-element .shepherd-arrow:before {
   background: #141828 !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: none !important;
 }
 
 .shepherd-element .shepherd-header {
