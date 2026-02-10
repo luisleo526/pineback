@@ -162,7 +162,7 @@
               <div class="w-2 h-2 rounded-full bg-blue-400"></div>
               <span class="text-xs font-semibold uppercase tracking-wider text-blue-300">Frontend — Vue 3 + Vite + Tailwind</span>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
               <div class="rounded-lg bg-dark-800/60 border border-white/[0.04] p-3 text-center">
                 <div class="text-lg mb-1">🎨</div>
                 <div class="text-[11px] font-medium text-white/80">Strategy Builder</div>
@@ -182,6 +182,11 @@
                 <div class="text-lg mb-1">🔄</div>
                 <div class="text-[11px] font-medium text-white/80">Job Tracker</div>
                 <div class="text-[10px] text-dark-400 mt-0.5">Progress polling (2s)<br>Multiple concurrent jobs</div>
+              </div>
+              <div class="rounded-lg bg-dark-800/60 border border-rose-500/15 p-3 text-center">
+                <div class="text-lg mb-1">🎙️</div>
+                <div class="text-[11px] font-medium text-white/80">Voice AI Agent</div>
+                <div class="text-[10px] text-dark-400 mt-0.5">OpenAI Realtime WebRTC<br>In-browser function calling</div>
               </div>
             </div>
           </div>
@@ -316,6 +321,88 @@
                 <div class="text-[11px] font-medium text-white/70">Trade Log</div>
                 <div class="text-[10px] text-dark-400">Every entry/exit + PnL</div>
               </div>
+            </div>
+          </div>
+
+          <!-- Voice AI Agent — WebRTC Flow -->
+          <div class="rounded-xl border border-rose-500/20 bg-rose-500/[0.04] p-5 mt-6">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-2 h-2 rounded-full bg-rose-400"></div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-rose-300">Voice AI Agent — OpenAI Realtime via WebRTC</span>
+            </div>
+
+            <div class="flex flex-col md:flex-row items-stretch gap-3">
+              <!-- Browser side -->
+              <div class="flex-1 rounded-lg bg-dark-800/60 border border-white/[0.04] p-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="text-sm">🎙️</div>
+                  <div class="text-[11px] font-medium text-rose-300">Result Page (Browser)</div>
+                </div>
+                <div class="space-y-1.5 text-[10px]">
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    <span class="text-dark-300">User clicks mic → WebRTC peer connection</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    <span class="text-dark-300">Microphone audio streamed to OpenAI</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    <span class="text-dark-300">AI voice response played via &lt;audio&gt;</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    <span class="text-white/70 font-medium">Function calls resolved from local data</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Connection arrows -->
+              <div class="flex md:flex-col items-center justify-center gap-1 py-2 md:py-0 md:px-2">
+                <div class="flex flex-col items-center gap-0.5">
+                  <svg class="w-5 h-5 text-rose-400 rotate-90 md:rotate-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+                  <span class="text-[8px] text-dark-500 font-mono">audio + data</span>
+                </div>
+                <div class="flex flex-col items-center gap-0.5">
+                  <svg class="w-5 h-5 text-rose-400 -rotate-90 md:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+                  <span class="text-[8px] text-dark-500 font-mono">voice + fn calls</span>
+                </div>
+              </div>
+
+              <!-- OpenAI side -->
+              <div class="flex-1 rounded-lg bg-dark-800/60 border border-white/[0.04] p-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="text-sm">🤖</div>
+                  <div class="text-[11px] font-medium text-rose-300">OpenAI Realtime API</div>
+                </div>
+                <div class="space-y-1.5 text-[10px]">
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    <span class="text-dark-300">gpt-4o-mini-realtime-preview model</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    <span class="text-dark-300">Voice activity detection (VAD)</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    <span class="text-dark-300">3 tools: metrics, trades, strategy info</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    <span class="text-dark-300">Streaming voice response</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SDP proxy note -->
+            <div class="mt-3 flex items-center gap-2 rounded-lg bg-dark-800/40 border border-white/[0.03] px-4 py-2.5">
+              <span class="text-[10px] text-dark-400">
+                <span class="text-green-400 font-medium">FastAPI</span> proxies the initial SDP handshake (keeps API key server-side).
+                After session creation, all communication flows <span class="text-rose-300 font-medium">directly between the browser and OpenAI</span> — the backend is not in the hot path.
+              </span>
             </div>
           </div>
         </div>
@@ -605,6 +692,12 @@ const features = [
     useCase: 'Quick-start backtesting without building from scratch',
     icon: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>',
   },
+  {
+    title: 'Voice AI Agent',
+    description: 'Discuss backtest results with an AI analyst via voice. Powered by OpenAI Realtime API over WebRTC — the agent uses function calling to fetch metrics and trades, resolved entirely in the browser from local data.',
+    useCase: 'Get instant spoken insights on strategy performance',
+    icon: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" /></svg>',
+  },
 ]
 
 // Metrics — must match the 4×4 grid in StatsCards.vue
@@ -724,5 +817,6 @@ const bonusFeatures = [
   { name: 'Drawdown Analysis', description: 'Underwater chart + top-N drawdown table with duration', useCase: 'Risk assessment and worst-case scenario analysis' },
   { name: 'Job Progress Tracking', description: 'Real-time status polling with progress percentage', useCase: 'Monitor multi-minute backtests without page refresh' },
   { name: 'IaC Deployment', description: 'Terraform + Docker Compose for reproducible infrastructure', useCase: 'One-command deployment to AWS' },
+  { name: 'Voice AI Agent', description: 'Voice conversation with AI via OpenAI Realtime WebRTC. Function calls resolved in-browser from loaded report data — no backend in the hot path.', useCase: 'Hands-free strategy analysis and performance Q&A' },
 ]
 </script>
