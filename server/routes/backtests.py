@@ -31,6 +31,8 @@ class BacktestRequest(BaseModel):
     initial_capital: float = 10000
     commission: float = 0.001      # fraction (0.001 = 0.1%)
     slippage: float = 0.0005       # fraction (0.0005 = 0.05%)
+    order_size: float = 100        # default 100% of equity
+    order_type: str = "percent"    # 'percent' or 'fixed'
     params: Dict[str, Any] = {}
     mode: str = "magnifier"
     symbol: str = "SPY"
@@ -76,10 +78,12 @@ def execute_backtest_job(job_id: str):
         source = TimescaleSource()
         backtester = Backtester(data_source=source)
 
-        # Extract commission/slippage from params, pass rest as strategy overrides
-        all_params = job.params or {}
+        # Extract execution settings from params, pass rest as strategy overrides
+        all_params = dict(job.params or {})
         fees = all_params.pop("_commission", None)
         slippage = all_params.pop("_slippage", None)
+        order_size = all_params.pop("_order_size", 100)
+        order_type = all_params.pop("_order_type", "percent")
         param_overrides = all_params
 
         result = backtester.run(
@@ -93,6 +97,8 @@ def execute_backtest_job(job_id: str):
             initial_capital=float(job.initial_capital),
             fees=fees,
             slippage=slippage,
+            order_size=order_size,
+            order_type=order_type,
             on_progress=on_progress,
             **param_overrides,
         )
@@ -144,10 +150,12 @@ async def submit_backtest(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"PineScript compile error: {e}")
 
-    # Store commission/slippage inside params with _ prefix (extracted by background job)
+    # Store execution settings inside params with _ prefix (extracted by background job)
     job_params = dict(req.params)
     job_params["_commission"] = req.commission
     job_params["_slippage"] = req.slippage
+    job_params["_order_size"] = req.order_size
+    job_params["_order_type"] = req.order_type
 
     # Create job row
     job = Backtest(

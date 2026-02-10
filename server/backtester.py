@@ -80,6 +80,8 @@ class Backtester:
         initial_capital: Optional[float] = None,
         fees: Optional[float] = None,
         slippage: Optional[float] = None,
+        order_size: float = 100,
+        order_type: str = "percent",
         on_progress: ProgressCallback = None,
         **param_overrides: Any,
     ) -> BacktestResult:
@@ -88,6 +90,10 @@ class Backtester:
 
         Parameters
         ----------
+        order_size : float
+            Position size per trade. Meaning depends on order_type.
+        order_type : str
+            'percent' = % of equity (100 = all-in), 'fixed' = fixed quantity.
         on_progress : callable, optional
             ``(pct: int, message: str) -> None`` called at each phase.
         """
@@ -98,6 +104,14 @@ class Backtester:
         capital = initial_capital or strategy.settings.get("initial_capital", 10_000)
         _fees = fees if fees is not None else strategy.settings.get("commission_value", 0.001)
         _slippage = slippage if slippage is not None else strategy.settings.get("slippage", 0.0005)
+
+        # Order sizing for vectorbt
+        if order_type == "percent":
+            _size = order_size / 100.0  # vectorbt uses fraction (1.0 = 100%)
+            _size_type = "percent"
+        else:
+            _size = order_size
+            _size_type = "amount"
 
         mode = "magnifier" if (magnify and timeframe != "1m") else "standard"
 
@@ -113,13 +127,13 @@ class Backtester:
             progress(18, "Preparing magnifier resolution")
             pf = self._run_magnified(
                 df_1m, df_tf, timeframe, strategy, params,
-                capital, _fees, _slippage, progress,
+                capital, _fees, _slippage, _size, _size_type, progress,
             )
         else:
             progress(20, "Computing signals")
             pf = self._run_standard(
                 df_tf, timeframe, strategy, params,
-                capital, _fees, _slippage, progress,
+                capital, _fees, _slippage, _size, _size_type, progress,
             )
 
         # Extract result
@@ -155,7 +169,7 @@ class Backtester:
     # ── standard mode ────────────────────────────────────────
 
     def _run_standard(self, df_tf, timeframe, strategy, params,
-                      capital, fees, slippage, progress):
+                      capital, fees, slippage, size, size_type, progress):
         long_e, long_x, short_e, short_x = strategy.compute(df_tf, params)
         progress(40, "Signals computed")
 
@@ -168,6 +182,8 @@ class Backtester:
             short_entries=short_e,
             short_exits=short_x,
             init_cash=capital,
+            size=size,
+            size_type=size_type,
             fees=fees,
             slippage=slippage,
             freq=RESAMPLE_MAP.get(timeframe, timeframe),
@@ -176,7 +192,7 @@ class Backtester:
     # ── magnifier mode (windowed recompute) ──────────────────
 
     def _run_magnified(self, df_1m, df_tf, timeframe, strategy, params,
-                       capital, fees, slippage, progress):
+                       capital, fees, slippage, size, size_type, progress):
         """Magnifier with dynamic resolution and progress reporting."""
         mag_tf = compute_magnifier_resolution(timeframe)
         df_mag = resample_ohlcv(df_1m, mag_tf) if mag_tf != "1m" else df_1m
@@ -285,6 +301,8 @@ class Backtester:
             short_entries=pd.Series(short_entries_mag, index=df_mag.index),
             short_exits=pd.Series(short_exits_mag, index=df_mag.index),
             init_cash=capital,
+            size=size,
+            size_type=size_type,
             fees=fees,
             slippage=slippage,
             freq=mag_freq,

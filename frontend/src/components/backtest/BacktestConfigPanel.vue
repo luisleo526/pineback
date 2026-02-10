@@ -80,16 +80,37 @@
       </div>
     </div>
 
-    <!-- Slippage -->
-    <div>
-      <label class="block text-xs text-white/40 mb-1">Slippage (%)</label>
-      <input
-        v-model.number="config.slippage"
-        type="number"
-        min="0"
-        step="0.01"
-        class="w-full bg-dark-800 border border-dark-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500"
-      />
+    <!-- Slippage + Order Size -->
+    <div class="grid grid-cols-2 gap-2">
+      <div>
+        <label class="block text-xs text-white/40 mb-1">Slippage (%)</label>
+        <input
+          v-model.number="config.slippage"
+          type="number"
+          min="0"
+          step="0.01"
+          class="w-full bg-dark-800 border border-dark-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500"
+        />
+      </div>
+      <div>
+        <label class="block text-xs text-white/40 mb-1">Order Size</label>
+        <div class="flex gap-1">
+          <input
+            v-model.number="config.orderSize"
+            type="number"
+            min="1"
+            :step="config.orderType === 'percent' ? 10 : 1"
+            class="flex-1 min-w-0 bg-dark-800 border border-dark-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500"
+          />
+          <select
+            v-model="config.orderType"
+            class="w-14 bg-dark-800 border border-dark-700 rounded-lg px-1 py-2 text-[10px] text-white focus:outline-none focus:border-accent-500"
+          >
+            <option value="percent">%</option>
+            <option value="fixed">Qty</option>
+          </select>
+        </div>
+      </div>
     </div>
 
     <!-- Magnifier Toggle -->
@@ -204,6 +225,8 @@ const config = reactive({
   initialCapital: 10000,
   commission: 0.1,
   slippage: 0.05,
+  orderSize: 100,
+  orderType: 'percent',  // 'percent' = % of equity, 'fixed' = fixed qty
   magnifier: true,
 })
 
@@ -328,6 +351,8 @@ function runBacktest() {
     initial_capital: config.initialCapital,
     commission: config.commission / 100,   // UI shows %, API expects fraction
     slippage: config.slippage / 100,       // UI shows %, API expects fraction
+    order_size: config.orderSize,
+    order_type: config.orderType,
     params,
     mode: config.magnifier ? 'magnifier' : 'standard',
   })
