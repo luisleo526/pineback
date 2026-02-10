@@ -29,7 +29,7 @@ export function formatDollar(v) {
 
 export function formatPnl(v) {
   if (formatNull(v)) return '—'
-  const sign = v > 0 ? '+' : ''
+  const sign = v > 0 ? '+' : v < 0 ? '-' : ''
   return `${sign}$${Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 

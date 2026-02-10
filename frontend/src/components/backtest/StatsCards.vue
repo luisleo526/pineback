@@ -59,7 +59,7 @@ const stats = computed(() => {
     },
     {
       label: 'Max Drawdown',
-      value: formatPct(r.max_drawdown_pct != null ? -Math.abs(r.max_drawdown_pct) : null),
+      value: r.max_drawdown_pct != null ? `${Math.abs(r.max_drawdown_pct).toFixed(2)}%` : '—',
       subtitle: formatDuration(r.max_drawdown_duration),
       colorClass: 'text-red-400',
     },
