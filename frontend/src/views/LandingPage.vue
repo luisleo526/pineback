@@ -148,38 +148,171 @@
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-16">
           <h2 class="text-3xl sm:text-4xl font-bold mb-4">Architecture</h2>
-          <p class="text-dark-300 max-w-xl mx-auto">Request lifecycle from browser to database and back.</p>
+          <p class="text-dark-300 max-w-xl mx-auto">Full system overview — from strategy creation to backtest results.</p>
         </div>
 
-        <!-- Architecture flow diagram -->
+        <!-- Visual Architecture Diagram -->
         <div class="max-w-5xl mx-auto">
-          <div class="flex flex-col items-center gap-3">
-            <div v-for="(layer, i) in archLayers" :key="layer.name" class="w-full">
-              <div class="rounded-xl border border-white/[0.06] bg-dark-800/40 backdrop-blur-sm p-5 flex items-center gap-5">
-                <div class="w-11 h-11 rounded-lg shrink-0 flex items-center justify-center text-lg" :class="layer.bg">
-                  {{ layer.emoji }}
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-2 mb-0.5">
-                    <h4 class="font-semibold text-sm">{{ layer.name }}</h4>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-dark-700 text-dark-300 font-mono">{{ layer.tech }}</span>
-                  </div>
-                  <p class="text-xs text-dark-400 leading-relaxed">{{ layer.desc }}</p>
-                </div>
+          <!-- Top row: Frontend -->
+          <div class="rounded-xl border border-blue-500/20 bg-blue-500/[0.04] p-5 mb-3">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-blue-300">Frontend — Vue 3 + Vite + Tailwind</span>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="rounded-lg bg-dark-800/60 border border-white/[0.04] p-3 text-center">
+                <div class="text-lg mb-1">🎨</div>
+                <div class="text-[11px] font-medium text-white/80">Strategy Builder</div>
+                <div class="text-[10px] text-dark-400 mt-0.5">No-code visual editor<br>40+ indicators, AND/OR logic</div>
               </div>
-              <div v-if="i < archLayers.length - 1" class="flex justify-center py-1">
-                <svg class="w-5 h-5 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
+              <div class="rounded-lg bg-dark-800/60 border border-white/[0.04] p-3 text-center">
+                <div class="text-lg mb-1">📝</div>
+                <div class="text-[11px] font-medium text-white/80">PineScript Preview</div>
+                <div class="text-[10px] text-dark-400 mt-0.5">Real-time code generation<br>from visual conditions</div>
+              </div>
+              <div class="rounded-lg bg-dark-800/60 border border-white/[0.04] p-3 text-center">
+                <div class="text-lg mb-1">📊</div>
+                <div class="text-[11px] font-medium text-white/80">Result Dashboard</div>
+                <div class="text-[10px] text-dark-400 mt-0.5">OHLCV chart + markers<br>Stats, equity, trade table</div>
+              </div>
+              <div class="rounded-lg bg-dark-800/60 border border-white/[0.04] p-3 text-center">
+                <div class="text-lg mb-1">🔄</div>
+                <div class="text-[11px] font-medium text-white/80">Job Tracker</div>
+                <div class="text-[10px] text-dark-400 mt-0.5">Progress polling (2s)<br>Multiple concurrent jobs</div>
               </div>
             </div>
           </div>
 
-          <div class="mt-10 rounded-xl border border-white/[0.06] bg-dark-800/30 p-6">
-            <h4 class="font-semibold mb-3 text-sm">Request Lifecycle</h4>
-            <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
-              <span v-for="(step, i) in pipelineSteps" :key="i" class="flex items-center gap-2">
-                <span class="px-3 py-1.5 rounded-md bg-dark-700 text-dark-200 whitespace-nowrap">{{ step }}</span>
-                <svg v-if="i < pipelineSteps.length - 1" class="w-4 h-4 text-accent-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-              </span>
+          <!-- Arrow down -->
+          <div class="flex justify-center py-1">
+            <div class="flex flex-col items-center">
+              <svg class="w-5 h-5 text-accent-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
+              <span class="text-[9px] text-dark-500 font-mono mt-0.5">POST /api/backtests</span>
+            </div>
+          </div>
+
+          <!-- Middle row: Backend -->
+          <div class="rounded-xl border border-green-500/20 bg-green-500/[0.04] p-5 mb-3">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-2 h-2 rounded-full bg-green-400"></div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-green-300">Backend — FastAPI + Python</span>
+            </div>
+
+            <!-- API Layer -->
+            <div class="rounded-lg bg-dark-800/60 border border-white/[0.04] p-4 mb-3">
+              <div class="text-[11px] font-medium text-white/80 mb-2">REST API Layer</div>
+              <div class="flex flex-wrap gap-2 text-[10px] font-mono">
+                <span class="px-2 py-1 rounded bg-dark-700 text-green-300">POST /api/backtests</span>
+                <span class="px-2 py-1 rounded bg-dark-700 text-green-300">GET /api/backtests/{id}</span>
+                <span class="px-2 py-1 rounded bg-dark-700 text-dark-300">GET /api/strategies</span>
+                <span class="px-2 py-1 rounded bg-dark-700 text-dark-300">POST /api/compile</span>
+                <span class="px-2 py-1 rounded bg-dark-700 text-dark-300">GET /api/symbols</span>
+              </div>
+            </div>
+
+            <!-- Two columns: Compiler + Backtester -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <!-- PineScript Compiler -->
+              <div class="rounded-lg bg-dark-800/60 border border-purple-500/10 p-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <div class="text-sm">🔧</div>
+                  <div class="text-[11px] font-medium text-purple-300">PineScript v6 Compiler</div>
+                </div>
+                <div class="flex items-center gap-1.5 text-[10px] font-mono">
+                  <span class="px-2 py-1 rounded bg-purple-500/10 text-purple-300">Tokenizer</span>
+                  <span class="text-dark-500">→</span>
+                  <span class="px-2 py-1 rounded bg-purple-500/10 text-purple-300">Parser</span>
+                  <span class="text-dark-500">→</span>
+                  <span class="px-2 py-1 rounded bg-purple-500/10 text-purple-300">AST</span>
+                  <span class="text-dark-500">→</span>
+                  <span class="px-2 py-1 rounded bg-purple-500/10 text-purple-300">Codegen</span>
+                </div>
+                <div class="text-[10px] text-dark-400 mt-2">Outputs: 4-signal model (long entry/exit, short entry/exit)</div>
+              </div>
+
+              <!-- Background Task + Backtester -->
+              <div class="rounded-lg bg-dark-800/60 border border-amber-500/10 p-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <div class="text-sm">⚡</div>
+                  <div class="text-[11px] font-medium text-amber-300">Background Task Runner</div>
+                </div>
+                <div class="space-y-1.5 text-[10px]">
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    <span class="text-dark-300">Load 1m OHLCV from TimescaleDB</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    <span class="text-dark-300">Resample to target timeframe</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    <span class="text-dark-300">Execute signals (standard or magnifier)</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    <span class="text-dark-300">vectorbt Portfolio.from_signals()</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    <span class="text-dark-300">Extract metrics, charts, trades</span>
+                  </div>
+                </div>
+                <div class="text-[10px] text-dark-500 mt-2">Progress: 0→100% reported to DB in real-time</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Arrow down -->
+          <div class="flex justify-center py-1">
+            <div class="flex flex-col items-center">
+              <svg class="w-5 h-5 text-accent-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
+              <span class="text-[9px] text-dark-500 font-mono mt-0.5">PgBouncer (connection pool)</span>
+            </div>
+          </div>
+
+          <!-- Bottom row: Database -->
+          <div class="rounded-xl border border-orange-500/20 bg-orange-500/[0.04] p-5 mb-6">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-2 h-2 rounded-full bg-orange-400"></div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-orange-300">Database — TimescaleDB (PostgreSQL 16)</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="rounded-lg bg-dark-800/60 border border-white/[0.04] p-3">
+                <div class="text-[11px] font-medium text-white/80 mb-1">ohlcv (hypertable)</div>
+                <div class="text-[10px] text-dark-400">SPY 1-minute candles, 2008-2021<br>~1.4M rows, 7-day chunk intervals<br>Compressed after 30 days</div>
+              </div>
+              <div class="rounded-lg bg-dark-800/60 border border-white/[0.04] p-3">
+                <div class="text-[11px] font-medium text-white/80 mb-1">backtests (job table)</div>
+                <div class="text-[10px] text-dark-400">Strategy name, PineScript source<br>Status + progress tracking (0-100%)<br>Full result JSON (charts, trades, stats)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Result flow -->
+          <div class="rounded-xl border border-white/[0.06] bg-dark-800/30 p-5">
+            <h4 class="font-semibold mb-4 text-sm">Backtest Result Includes</h4>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+              <div class="rounded-lg bg-dark-700/50 p-3">
+                <div class="text-lg mb-1">📈</div>
+                <div class="text-[11px] font-medium text-white/70">OHLCV Bars</div>
+                <div class="text-[10px] text-dark-400">Candlestick + volume</div>
+              </div>
+              <div class="rounded-lg bg-dark-700/50 p-3">
+                <div class="text-lg mb-1">🎯</div>
+                <div class="text-[11px] font-medium text-white/70">Trade Markers</div>
+                <div class="text-[10px] text-dark-400">Entry/exit on chart</div>
+              </div>
+              <div class="rounded-lg bg-dark-700/50 p-3">
+                <div class="text-lg mb-1">📋</div>
+                <div class="text-[11px] font-medium text-white/70">Performance</div>
+                <div class="text-[10px] text-dark-400">CAGR, Sharpe, DD, etc.</div>
+              </div>
+              <div class="rounded-lg bg-dark-700/50 p-3">
+                <div class="text-lg mb-1">📊</div>
+                <div class="text-[11px] font-medium text-white/70">Trade Log</div>
+                <div class="text-[10px] text-dark-400">Every entry/exit + PnL</div>
+              </div>
             </div>
           </div>
         </div>
