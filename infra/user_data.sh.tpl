@@ -14,7 +14,7 @@ set -euo pipefail
 exec > /var/log/user-data.log 2>&1
 echo "=== Bootstrap started at $(date) ==="
 
-# ── Install Docker ───────────────────────────────────────────────
+# ── Install Docker + Git LFS ─────────────────────────────────────
 
 yum update -y
 yum install -y docker git git-lfs
@@ -32,9 +32,10 @@ chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
 echo "Docker Compose installed: $(docker compose version)"
 
-# ── Clone project ────────────────────────────────────────────────
+# ── Clone project (with LFS data) ────────────────────────────────
 
 cd /opt
+git lfs install
 git clone ${repo_url} pineback
 cd pineback
 git lfs pull
@@ -49,14 +50,25 @@ export OPENAI_SECRET_NAME="${openai_secret_name}"
 docker compose -f docker-compose.prod.yml up -d --build
 
 echo "Services started. Waiting for database to be ready..."
-sleep 25
+
+# Poll until PgBouncer can accept connections (up to 120s)
+for i in $(seq 1 24); do
+  if docker compose -f docker-compose.prod.yml exec -T app \
+    python -c "import psycopg2, os; psycopg2.connect(os.environ['DATABASE_URL'])" 2>/dev/null; then
+    echo "Database is ready (after ~$((i * 5))s)"
+    break
+  fi
+  echo "  Waiting for database... ($((i * 5))s)"
+  sleep 5
+done
 
 # ── Ingest SPY data ──────────────────────────────────────────────
 
 echo "Ingesting SPY data..."
-docker compose -f docker-compose.prod.yml exec -T app python -m server.ingest
+docker compose -f docker-compose.prod.yml exec -T app python -m server.ingest \
+  || echo "WARNING: Data ingestion failed. Run manually: docker compose -f docker-compose.prod.yml exec app python -m server.ingest"
 
-echo "Data ingestion complete."
+echo "Data ingestion step complete."
 
 # ── SSL Certificate (Let's Encrypt via certbot) ──────────────────
 
