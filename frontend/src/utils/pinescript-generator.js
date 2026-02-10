@@ -811,8 +811,9 @@ function buildExitArgs(posLabel, direction, es) {
  * Generate input declaration PineScript
  */
 function generateInputDeclaration(input) {
-  // Use stored varName if available (from quick-create), otherwise generate
-  const varName = input._varName || toCamelCase(input.name)
+  // Use the input name directly if it's already a valid PineScript identifier.
+  // Only fall back to toCamelCase for names with spaces/special chars.
+  const varName = input._varName || (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(input.name) ? input.name : toCamelCase(input.name))
   
   if (input.type === 'int') {
     let code = `${varName} = input.int(${input.default}, "${input.name}"`
