@@ -83,15 +83,17 @@ function buildTradeSeriesData() {
     const time = toUnix(m.timestamp)
     const price = m.price
 
+    // Shapes: circle = entry, square = exit
+    // Colors: blue (#2962FF) = long, pink (#e91e63) = short
     if (isLong) {
       longData.push({ time, value: price })
       longMarkers.push({
         time,
         position: 'inBar',
         color: '#2962FF',
-        shape: isEntry ? 'arrowUp' : 'arrowDown',
-        text: isEntry ? 'Long' : '',
-        size: 1,
+        shape: isEntry ? 'circle' : 'square',
+        text: isEntry ? 'L' : '',
+        size: 0,
       })
     } else {
       shortData.push({ time, value: price })
@@ -99,9 +101,9 @@ function buildTradeSeriesData() {
         time,
         position: 'inBar',
         color: '#e91e63',
-        shape: isEntry ? 'arrowDown' : 'arrowUp',
-        text: isEntry ? 'Short' : '',
-        size: 1,
+        shape: isEntry ? 'circle' : 'square',
+        text: isEntry ? 'S' : '',
+        size: 0,
       })
     }
   }
