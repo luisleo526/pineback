@@ -33,8 +33,8 @@ echo "Docker Compose installed: $(docker compose version)"
 # ── Clone project ────────────────────────────────────────────────
 
 cd /opt
-git clone ${repo_url} backtest-system
-cd backtest-system
+git clone ${repo_url} pineback
+cd pineback
 
 echo "Project cloned from ${repo_url}"
 

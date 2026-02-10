@@ -548,7 +548,7 @@
 <script setup>
 import { ref } from 'vue'
 
-const githubUrl = 'https://github.com/YOUR_USERNAME/pineback'
+const githubUrl = 'https://github.com/luisleo526/pineback'
 
 // Hero stat previews
 const heroStats = [

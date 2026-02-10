@@ -13,7 +13,7 @@
 key_pair_name = "my-key-pair"
 
 # Git repository URL (HTTPS, must be publicly accessible for git clone)
-repo_url = "https://github.com/YOUR_USERNAME/backtest-system.git"
+repo_url = "https://github.com/luisleo526/pineback.git"
 
 # ── Domain & DNS ─────────────────────────────────────────────────
 # Change these to your own Route 53 hosted zone and desired subdomain.
