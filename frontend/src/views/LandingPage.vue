@@ -679,39 +679,41 @@
 <span class="text-accent-400">git</span> clone {{ githubUrl }}.git
 <span class="text-accent-400">cd</span> pineback
 
-<span class="text-dark-500"># Backend</span>
-<span class="text-accent-400">cd</span> backend
-<span class="text-accent-400">python</span> -m venv .venv && source .venv/bin/activate
-<span class="text-accent-400">pip</span> install -r requirements.txt
-<span class="text-accent-400">uvicorn</span> app.main:app --reload --port 8000
+<span class="text-dark-500"># Start TimescaleDB + PgBouncer</span>
+<span class="text-accent-400">cd</span> server/docker && docker compose up -d && cd ../..
+
+<span class="text-dark-500"># Install deps & ingest SPY data</span>
+<span class="text-accent-400">pip</span> install -r server/requirements.txt
+<span class="text-accent-400">python</span> -m server.ingest
+
+<span class="text-dark-500"># Start backend</span>
+<span class="text-accent-400">uvicorn</span> server.main:app --reload --port 8000
 
 <span class="text-dark-500"># Frontend (new terminal)</span>
-<span class="text-accent-400">cd</span> frontend
-<span class="text-accent-400">npm</span> install && npm run dev</pre>
+<span class="text-accent-400">cd</span> frontend && npm install && npm run dev</pre>
           </div>
 
-          <!-- Docker -->
+          <!-- Docker / Cloud -->
           <div class="rounded-xl border border-white/[0.06] bg-dark-800/30 backdrop-blur-sm overflow-hidden">
             <div class="flex items-center gap-2 px-5 py-3 border-b border-white/[0.06] bg-dark-800/60">
               <div class="w-2.5 h-2.5 rounded-full bg-red-500/60"></div>
               <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/60"></div>
               <div class="w-2.5 h-2.5 rounded-full bg-green-500/60"></div>
-              <span class="text-xs text-dark-400 ml-2 font-mono">Docker Deployment</span>
+              <span class="text-xs text-dark-400 ml-2 font-mono">Production (Docker) / Cloud (Terraform)</span>
             </div>
-            <pre class="p-5 text-sm font-mono text-dark-200 leading-relaxed overflow-x-auto"><span class="text-dark-500"># Single command — full stack</span>
-<span class="text-accent-400">docker</span> compose up --build -d
+            <pre class="p-5 text-sm font-mono text-dark-200 leading-relaxed overflow-x-auto"><span class="text-dark-500"># Docker — full stack on localhost</span>
+<span class="text-accent-400">docker</span> compose -f docker-compose.prod.yml up -d --build
+<span class="text-accent-400">docker</span> compose -f docker-compose.prod.yml exec \
+  app python -m server.ingest
+<span class="text-accent-400">open</span> http://localhost
 
-<span class="text-dark-500"># Services started:</span>
-<span class="text-dark-500">#   web        → nginx + Vue SPA     :443</span>
-<span class="text-dark-500">#   api        → FastAPI + uvicorn    :8000</span>
-<span class="text-dark-500">#   db         → TimescaleDB          :5432</span>
-<span class="text-dark-500">#   pgbouncer  → connection pooler    :6432</span>
-
-<span class="text-dark-500"># Ingest market data</span>
-<span class="text-accent-400">docker</span> compose exec api python -m app.ingest
-
-<span class="text-dark-500"># Open in browser</span>
-<span class="text-accent-400">open</span> https://localhost</pre>
+<span class="text-dark-500"># Cloud — one-command AWS deploy</span>
+<span class="text-accent-400">cd</span> infra
+<span class="text-accent-400">cp</span> terraform.tfvars.example terraform.tfvars
+<span class="text-dark-500"># Edit: key_pair, repo_url, domain, openai_api_key</span>
+<span class="text-accent-400">terraform</span> init && terraform apply
+<span class="text-dark-500"># Auto: Docker build, data ingest, SSL setup</span>
+<span class="text-dark-500"># Output: https://your-domain.example.com</span></pre>
           </div>
         </div>
       </div>

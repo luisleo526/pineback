@@ -135,12 +135,33 @@ docker compose -f docker-compose.prod.yml exec app python -m server.ingest
 ```bash
 cd infra
 cp terraform.tfvars.example terraform.tfvars
-# Edit: key_pair_name, repo_url, domain_name, hosted_zone_name, admin_email
+# Edit terraform.tfvars:
+#   key_pair_name  = "my-key-pair"
+#   repo_url       = "https://github.com/you/pineback.git"
+#   domain_name    = "backtest.example.com"
+#   hosted_zone_name = "example.com"
+#   admin_email    = "you@example.com"
+#   openai_api_key = "sk-..."          # for Voice AI agent
 terraform init && terraform apply
-# Output: https://your-domain.example.com
 ```
 
-Requires: AWS account with a Route 53 hosted zone and an EC2 key pair. All resources are parameterized — see `terraform.tfvars.example`.
+**What happens automatically:**
+
+1. Provisions EC2 (t3.large), Elastic IP, Route 53 DNS, Security Group
+2. Creates a Secrets Manager secret with the OpenAI API key
+3. Creates an IAM role + instance profile so the app can read secrets
+4. Bootstrap script (`user_data.sh.tpl`) runs on first boot:
+   - Installs Docker, Docker Compose, git-lfs
+   - Clones the repo and pulls LFS data (SPY CSV)
+   - Builds all containers (`docker compose -f docker-compose.prod.yml up --build`)
+   - Polls DB readiness, then ingests ~1.4M SPY bars
+   - Obtains an SSL certificate via Let's Encrypt (certbot)
+   - Writes the SSL nginx config and restarts nginx
+5. App is live at `https://your-domain.example.com` within ~5 minutes
+
+**Requirements:** AWS account with a Route 53 hosted zone and an EC2 key pair. All resources are parameterized — see `terraform.tfvars.example`.
+
+**Voice AI agent:** Requires the `openai_api_key` variable. The key is stored in AWS Secrets Manager and loaded at runtime via the EC2 instance profile — no secrets in env vars or Docker images.
 
 ## Key Assumptions
 
