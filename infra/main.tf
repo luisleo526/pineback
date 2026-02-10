@@ -91,6 +91,60 @@ resource "aws_security_group" "backtest" {
   }
 }
 
+# ── Secrets Manager: OpenAI API key ──────────────────────────────
+
+resource "aws_secretsmanager_secret" "openai" {
+  name        = "pineback/openai-api-key"
+  description = "OpenAI API key for PineBack voice AI agent"
+
+  tags = {
+    Name = "pineback-openai-key"
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "openai" {
+  secret_id     = aws_secretsmanager_secret.openai.id
+  secret_string = jsonencode({ OPENAI_API_KEY = var.openai_api_key })
+}
+
+# ── IAM: EC2 role with Secrets Manager read access ──────────────
+
+resource "aws_iam_role" "backtest" {
+  name = "pineback-ec2-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action    = "sts:AssumeRole"
+      Effect    = "Allow"
+      Principal = { Service = "ec2.amazonaws.com" }
+    }]
+  })
+
+  tags = {
+    Name = "pineback-ec2-role"
+  }
+}
+
+resource "aws_iam_role_policy" "secrets_read" {
+  name = "pineback-secrets-read"
+  role = aws_iam_role.backtest.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "secretsmanager:GetSecretValue"
+      Resource = aws_secretsmanager_secret.openai.arn
+    }]
+  })
+}
+
+resource "aws_iam_instance_profile" "backtest" {
+  name = "pineback-ec2-profile"
+  role = aws_iam_role.backtest.name
+}
+
 # ── EC2 Instance ─────────────────────────────────────────────────
 
 resource "aws_instance" "backtest" {
@@ -99,6 +153,7 @@ resource "aws_instance" "backtest" {
   key_name               = var.key_pair_name
   vpc_security_group_ids = [aws_security_group.backtest.id]
   subnet_id              = var.subnet_id != "" ? var.subnet_id : data.aws_subnets.public.ids[0]
+  iam_instance_profile   = aws_iam_instance_profile.backtest.name
 
   root_block_device {
     volume_size = var.volume_size
@@ -106,9 +161,11 @@ resource "aws_instance" "backtest" {
   }
 
   user_data = templatefile("${path.module}/user_data.sh.tpl", {
-    repo_url    = var.repo_url
-    domain_name = var.domain_name
-    admin_email = var.admin_email
+    repo_url          = var.repo_url
+    domain_name       = var.domain_name
+    admin_email       = var.admin_email
+    aws_region        = var.aws_region
+    openai_secret_name = aws_secretsmanager_secret.openai.name
   })
 
   tags = {

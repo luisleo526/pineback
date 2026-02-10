@@ -4,9 +4,11 @@
 # ingests SPY data, and sets up SSL.
 #
 # Variables injected by Terraform templatefile():
-#   ${repo_url}    — Git repository URL
-#   ${domain_name} — Domain for the app (and SSL cert)
-#   ${admin_email} — Email for Let's Encrypt
+#   ${repo_url}           — Git repository URL
+#   ${domain_name}        — Domain for the app (and SSL cert)
+#   ${admin_email}        — Email for Let's Encrypt
+#   ${aws_region}         — AWS region (for Secrets Manager)
+#   ${openai_secret_name} — Secrets Manager secret name
 
 set -euo pipefail
 exec > /var/log/user-data.log 2>&1
@@ -39,6 +41,9 @@ cd pineback
 echo "Project cloned from ${repo_url}"
 
 # ── Build and start all services ─────────────────────────────────
+
+export AWS_DEFAULT_REGION="${aws_region}"
+export OPENAI_SECRET_NAME="${openai_secret_name}"
 
 docker compose -f docker-compose.prod.yml up -d --build
 

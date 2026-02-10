@@ -17,3 +17,8 @@ output "instance_id" {
   description = "EC2 instance ID"
   value       = aws_instance.backtest.id
 }
+
+output "secret_arn" {
+  description = "ARN of the Secrets Manager secret storing the OpenAI API key"
+  value       = aws_secretsmanager_secret.openai.arn
+}

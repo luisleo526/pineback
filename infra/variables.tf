@@ -50,6 +50,15 @@ variable "volume_size" {
   default     = 30
 }
 
+# ── Secrets ──────────────────────────────────────────────────────
+
+variable "openai_api_key" {
+  description = "OpenAI API key for the voice AI agent. Stored in Secrets Manager."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 # ── Network ──────────────────────────────────────────────────────
 
 variable "allowed_ssh_cidr" {
