@@ -22,8 +22,7 @@ let candleChart = null
 let volumeChart = null
 let candleSeries = null
 let volumeSeries = null
-let longMarkerSeries = null
-let shortMarkerSeries = null
+let tradeMarkerPrimitive = null
 let syncing = false
 let resizeObserver = null
 
@@ -67,54 +66,97 @@ function buildVolumeData() {
   }))
 }
 
-function buildTradeSeriesData() {
-  // Split markers into long and short, each with data points at exact fill prices
-  // These will be rendered as invisible line series with inBar markers
-  const longData = []
-  const longMarkers = []
-  const shortData = []
-  const shortMarkers = []
-
-  if (!props.tradeMarkers?.length) return { longData, longMarkers, shortData, shortMarkers }
-
-  for (const m of props.tradeMarkers) {
-    const isLong = m.direction === 'Long' || m.direction === 'long'
-    const isEntry = m.is_entry
-    const time = toUnix(m.timestamp)
-    const price = m.price
-
-    // Use arrowUp/arrowDown at exact price via hidden line series
-    // Blue = long, Pink = short, size 1 = small and clean
-    if (isLong) {
-      longData.push({ time, value: price })
-      longMarkers.push({
-        time,
-        position: 'inBar',
-        color: '#2962FF',
-        shape: isEntry ? 'arrowUp' : 'arrowDown',
-        text: '',
-        size: 1,
-      })
-    } else {
-      shortData.push({ time, value: price })
-      shortMarkers.push({
-        time,
-        position: 'inBar',
-        color: '#e91e63',
-        shape: isEntry ? 'arrowDown' : 'arrowUp',
-        text: '',
-        size: 1,
-      })
-    }
+/**
+ * Series Primitive that draws horizontal arrows at exact price Y-coordinates.
+ * Uses Canvas2D via the lightweight-charts plugin API.
+ */
+class TradeMarkersPrimitive {
+  constructor(markers) {
+    this._markers = markers  // [{time, price, isLong, isEntry}, ...]
+    this._series = null
+    this._chart = null
   }
 
-  // Sort all by time (required by lightweight-charts)
-  longData.sort((a, b) => a.time - b.time)
-  longMarkers.sort((a, b) => a.time - b.time)
-  shortData.sort((a, b) => a.time - b.time)
-  shortMarkers.sort((a, b) => a.time - b.time)
+  attached({ chart, series }) {
+    this._chart = chart
+    this._series = series
+  }
 
-  return { longData, longMarkers, shortData, shortMarkers }
+  detached() {
+    this._chart = null
+    this._series = null
+  }
+
+  updateAllViews() {}
+
+  paneViews() {
+    return [new TradeMarkersRenderer(this._markers, this._series, this._chart)]
+  }
+}
+
+class TradeMarkersRenderer {
+  constructor(markers, series, chart) {
+    this._markers = markers
+    this._series = series
+    this._chart = chart
+  }
+
+  zOrder() { return 'top' }
+
+  renderer() {
+    const markers = this._markers
+    const series = this._series
+    const chart = this._chart
+    return {
+      draw(target) {
+        const ctx = target.context
+        if (!series || !chart) return
+
+        const timeScale = chart.timeScale()
+
+        for (const m of markers) {
+          const x = timeScale.timeToCoordinate(m.time)
+          const y = series.priceToCoordinate(m.price)
+          if (x === null || y === null) continue
+
+          const color = m.isLong ? '#2962FF' : '#e91e63'
+          const size = 6
+          const dir = m.isEntry ? 1 : -1  // 1 = pointing right, -1 = pointing left
+
+          ctx.save()
+          ctx.fillStyle = color
+
+          // Draw horizontal triangle (pointing right for entry, left for exit)
+          ctx.beginPath()
+          if (dir === 1) {
+            // Right-pointing triangle: ▶
+            ctx.moveTo(x - size, y - size * 0.7)
+            ctx.lineTo(x + size, y)
+            ctx.lineTo(x - size, y + size * 0.7)
+          } else {
+            // Left-pointing triangle: ◀
+            ctx.moveTo(x + size, y - size * 0.7)
+            ctx.lineTo(x - size, y)
+            ctx.lineTo(x + size, y + size * 0.7)
+          }
+          ctx.closePath()
+          ctx.fill()
+
+          ctx.restore()
+        }
+      }
+    }
+  }
+}
+
+function buildPrimitiveMarkers() {
+  if (!props.tradeMarkers?.length) return []
+  return props.tradeMarkers.map(m => ({
+    time: toUnix(m.timestamp),
+    price: m.price,
+    isLong: m.direction === 'Long' || m.direction === 'long',
+    isEntry: !!m.is_entry,
+  }))
 }
 
 function createCharts() {
@@ -138,25 +180,6 @@ function createCharts() {
     borderDownColor: '#ef4444',
     wickUpColor: '#22c55e',
     wickDownColor: '#ef4444',
-  })
-
-  // Hidden line series for trade markers at exact Y-axis prices
-  // Long trades: blue markers at exact fill price
-  longMarkerSeries = candleChart.addLineSeries({
-    color: 'transparent',
-    lineWidth: 0,
-    priceLineVisible: false,
-    lastValueVisible: false,
-    crosshairMarkerVisible: false,
-  })
-
-  // Short trades: pink markers at exact fill price
-  shortMarkerSeries = candleChart.addLineSeries({
-    color: 'transparent',
-    lineWidth: 0,
-    priceLineVisible: false,
-    lastValueVisible: false,
-    crosshairMarkerVisible: false,
   })
 
   volumeSeries = volumeChart.addHistogramSeries({
@@ -214,16 +237,14 @@ function setData() {
   candleSeries.setData(candleData)
   volumeSeries.setData(volumeData)
 
-  // Trade markers on hidden line series at exact fill prices
-  const { longData, longMarkers, shortData, shortMarkers } = buildTradeSeriesData()
-  console.log(`Trade markers: ${longData.length} long, ${shortData.length} short`)
-  if (longMarkerSeries && longData.length) {
-    longMarkerSeries.setData(longData)
-    longMarkerSeries.setMarkers(longMarkers)
+  // Trade markers as canvas primitives at exact Y-axis prices
+  if (tradeMarkerPrimitive) {
+    candleSeries.detachPrimitive(tradeMarkerPrimitive)
   }
-  if (shortMarkerSeries && shortData.length) {
-    shortMarkerSeries.setData(shortData)
-    shortMarkerSeries.setMarkers(shortMarkers)
+  const primitiveMarkers = buildPrimitiveMarkers()
+  if (primitiveMarkers.length) {
+    tradeMarkerPrimitive = new TradeMarkersPrimitive(primitiveMarkers)
+    candleSeries.attachPrimitive(tradeMarkerPrimitive)
   }
 
   candleChart.timeScale().fitContent()
