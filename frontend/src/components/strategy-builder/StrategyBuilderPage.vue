@@ -471,6 +471,14 @@ watch(() => props.initialStrategy, (newStrategy) => {
     applyStrategyData(newStrategy.strategy_data)
   }
 }, { deep: true })
+
+// Emit strategy-changed whenever generated code changes
+watch(generatedCode, (code) => {
+  emit('strategy-changed', { generatedCode: code, strategy })
+}, { immediate: true })
+
+// Expose internal state for parent components (e.g. BacktestApp)
+defineExpose({ applyStrategyData, strategy, generatedCode })
 </script>
 
 <style scoped>
