@@ -268,8 +268,8 @@ function createTour() {
   })
 
   // Step 7: Inspect variables panel (read-only)
-  // Attach to the variables tab, tooltip below. Extra spotlight on
-  // the variables content area so the user can read the definitions.
+  // Tooltip goes LEFT so the entire variables panel content on the
+  // right stays visible and readable. Extra spotlight on the panel.
   tour.addStep({
     id: 'inspect-variables',
     title: 'Strategy Variables',
@@ -278,12 +278,12 @@ function createTour() {
       <p class="mt-1 text-sm opacity-70">Variables can be indicators, price data, or math expressions. They're referenced in conditions.</p>
       <p class="text-xs opacity-40 mt-2">Step 7 of 12</p>
     `,
-    attachTo: { element: '[data-tab="variables"]', on: 'bottom' },
+    attachTo: { element: '.variables-panel', on: 'left' },
     buttons: [
       { text: '← Back', action: tour.back, classes: 'shepherd-button-secondary' },
       { text: 'Next →', action: tour.next, classes: 'shepherd-button-primary' },
     ],
-    when: _multiSpotlight(['.variables-panel']),
+    when: _multiSpotlight(['[data-tab="variables"]']),
   })
 
   // Step 8: Click Backtest button in the header (action)
