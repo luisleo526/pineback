@@ -49,8 +49,12 @@ sed -i "s/__DOMAIN__/${domain_name}/g" nginx/nginx.conf
 
 # ── Build and start all services ─────────────────────────────────
 
-export AWS_DEFAULT_REGION="${aws_region}"
-export OPENAI_SECRET_NAME="${openai_secret_name}"
+# Write a .env file so Docker Compose picks up these vars on every
+# start/restart — not just the initial `docker compose up`.
+cat > .env <<ENVEOF
+AWS_DEFAULT_REGION=${aws_region}
+OPENAI_SECRET_NAME=${openai_secret_name}
+ENVEOF
 
 docker compose -f docker-compose.prod.yml up -d --build
 
