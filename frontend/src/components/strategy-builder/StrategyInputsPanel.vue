@@ -27,7 +27,7 @@
       >
         <div class="flex items-start gap-2">
           <!-- Input Name -->
-          <div class="flex-1 space-y-2">
+          <div class="flex-1 min-w-0 space-y-2">
             <div class="flex items-center gap-2">
               <input
                 :value="input.name"
@@ -35,7 +35,7 @@
                 type="text"
                 placeholder="myParam"
                 :class="[
-                  'flex-1 bg-dark-700 rounded px-2 py-1 text-sm text-white focus:outline-none font-mono',
+                  'flex-1 min-w-0 bg-dark-700 rounded px-2 py-1.5 text-sm text-white focus:outline-none font-mono',
                   isDuplicate(input)
                     ? 'border border-red-500/70 focus:border-red-400'
                     : 'border border-dark-600 focus:border-accent-500'
@@ -44,56 +44,64 @@
               <select
                 v-model="input.type"
                 @change="onTypeChange(index)"
-                class="w-20 bg-dark-700 border border-dark-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-accent-500"
+                class="w-16 flex-shrink-0 bg-dark-700 border border-dark-600 rounded px-1.5 py-1.5 text-[11px] text-white focus:outline-none focus:border-accent-500"
               >
-                <option value="int">Integer</option>
+                <option value="int">Int</option>
                 <option value="float">Float</option>
-                <option value="bool">Boolean</option>
+                <option value="bool">Bool</option>
               </select>
             </div>
             <p v-if="isDuplicate(input)" class="text-xs text-red-400 ml-0.5">
-              <i class="fas fa-exclamation-circle mr-1"></i>Duplicate name, please use a different name
+              <i class="fas fa-exclamation-circle mr-1"></i>Duplicate name
             </p>
 
             <!-- Value Configuration -->
-            <div class="flex items-center gap-2 text-xs">
+            <div class="grid grid-cols-3 gap-1.5 text-xs">
               <template v-if="input.type === 'int' || input.type === 'float'">
-                <span class="text-dark-500">Default:</span>
-                <input
-                  v-model.number="input.default"
-                  @input="updateInput(index)"
-                  type="number"
-                  :step="input.type === 'float' ? 0.1 : 1"
-                  class="w-16 bg-dark-700 border border-dark-600 rounded px-2 py-1 text-white focus:outline-none focus:border-accent-500"
-                />
-                <span class="text-dark-500">Min:</span>
-                <input
-                  v-model.number="input.min"
-                  @input="updateInput(index)"
-                  type="number"
-                  :step="input.type === 'float' ? 0.1 : 1"
-                  class="w-14 bg-dark-700 border border-dark-600 rounded px-2 py-1 text-white focus:outline-none focus:border-accent-500"
-                />
-                <span class="text-dark-500">Max:</span>
-                <input
-                  v-model.number="input.max"
-                  @input="updateInput(index)"
-                  type="number"
-                  :step="input.type === 'float' ? 0.1 : 1"
-                  placeholder="No limit"
-                  class="w-14 bg-dark-700 border border-dark-600 rounded px-2 py-1 text-white focus:outline-none focus:border-accent-500"
-                />
+                <div>
+                  <span class="text-dark-500 text-[10px] block mb-0.5">Default</span>
+                  <input
+                    v-model.number="input.default"
+                    @input="updateInput(index)"
+                    type="number"
+                    :step="input.type === 'float' ? 0.1 : 1"
+                    class="w-full bg-dark-700 border border-dark-600 rounded px-2 py-1.5 text-white focus:outline-none focus:border-accent-500"
+                  />
+                </div>
+                <div>
+                  <span class="text-dark-500 text-[10px] block mb-0.5">Min</span>
+                  <input
+                    v-model.number="input.min"
+                    @input="updateInput(index)"
+                    type="number"
+                    :step="input.type === 'float' ? 0.1 : 1"
+                    class="w-full bg-dark-700 border border-dark-600 rounded px-2 py-1.5 text-white focus:outline-none focus:border-accent-500"
+                  />
+                </div>
+                <div>
+                  <span class="text-dark-500 text-[10px] block mb-0.5">Max</span>
+                  <input
+                    v-model.number="input.max"
+                    @input="updateInput(index)"
+                    type="number"
+                    :step="input.type === 'float' ? 0.1 : 1"
+                    placeholder="—"
+                    class="w-full bg-dark-700 border border-dark-600 rounded px-2 py-1.5 text-white focus:outline-none focus:border-accent-500"
+                  />
+                </div>
               </template>
               <template v-else-if="input.type === 'bool'">
-                <span class="text-dark-500">Default:</span>
-                <select
-                  v-model="input.default"
-                  @change="updateInput(index)"
-                  class="bg-dark-700 border border-dark-600 rounded px-2 py-1 text-white focus:outline-none focus:border-accent-500"
-                >
-                  <option :value="true">Yes (true)</option>
-                  <option :value="false">No (false)</option>
-                </select>
+                <div class="col-span-3">
+                  <span class="text-dark-500 text-[10px] block mb-0.5">Default</span>
+                  <select
+                    v-model="input.default"
+                    @change="updateInput(index)"
+                    class="w-full bg-dark-700 border border-dark-600 rounded px-2 py-1.5 text-white focus:outline-none focus:border-accent-500"
+                  >
+                    <option :value="true">true</option>
+                    <option :value="false">false</option>
+                  </select>
+                </div>
               </template>
             </div>
           </div>
@@ -109,8 +117,8 @@
         </div>
 
         <!-- Preview -->
-        <div class="mt-2 pt-2 border-t border-dark-700">
-          <code class="text-xs text-dark-400 font-mono">
+        <div class="mt-2 pt-2 border-t border-dark-700 overflow-hidden">
+          <code class="text-[10px] text-dark-400 font-mono break-all leading-relaxed">
             {{ getInputPinescript(input) }}
           </code>
         </div>
