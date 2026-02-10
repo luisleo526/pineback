@@ -168,12 +168,17 @@ class ta:
 
     @staticmethod
     def stoch(close: pd.Series, high: pd.Series, low: pd.Series,
-              length: int = 14) -> pd.Series:
-        """Raw Stochastic %K (unsmoothed)."""
+              length: int = 14, smooth_k: int = 1, smooth_d: int = 3):
+        """Stochastic oscillator. Returns (K, D) tuple for multi-output support."""
         length = int(length)
+        smooth_k = int(smooth_k) if smooth_k else 1
+        smooth_d = int(smooth_d) if smooth_d else 3
         lowest_low = low.rolling(length).min()
         highest_high = high.rolling(length).max()
-        return 100 * (close - lowest_low) / (highest_high - lowest_low)
+        raw_k = 100 * (close - lowest_low) / (highest_high - lowest_low)
+        k = raw_k.rolling(smooth_k).mean() if smooth_k > 1 else raw_k
+        d = k.rolling(smooth_d).mean()
+        return k, d
 
     @staticmethod
     def cci(source: pd.Series, length: int = 20) -> pd.Series:
