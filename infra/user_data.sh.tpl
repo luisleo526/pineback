@@ -17,7 +17,7 @@ echo "=== Bootstrap started at $(date) ==="
 # ── Install Docker ───────────────────────────────────────────────
 
 yum update -y
-yum install -y docker git
+yum install -y docker git git-lfs
 systemctl enable docker
 systemctl start docker
 usermod -aG docker ec2-user
@@ -37,6 +37,7 @@ echo "Docker Compose installed: $(docker compose version)"
 cd /opt
 git clone ${repo_url} pineback
 cd pineback
+git lfs pull
 
 echo "Project cloned from ${repo_url}"
 
