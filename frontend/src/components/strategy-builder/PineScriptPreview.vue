@@ -93,42 +93,6 @@
       <div v-show="activeTab === 'code'" class="h-full">
         <div class="code-container h-full overflow-auto bg-dark-950 font-mono text-xs code-protected" v-html="highlightedCode" @copy.prevent="onCopyAttempt"></div>
       </div>
-      
-      <!-- Setup guide tab -->
-      <div v-show="activeTab === 'setup'" class="p-4 space-y-4">
-        <div class="space-y-3">
-          <h4 class="text-sm font-semibold text-white">TradingView Setup Steps</h4>
-          
-          <div class="space-y-2">
-            <div v-for="(step, i) in setupSteps" :key="i" class="flex gap-3">
-              <div class="w-6 h-6 bg-accent-600 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold text-white">
-                {{ i + 1 }}
-              </div>
-              <div>
-                <p class="text-sm text-dark-200">{{ step.title }}</p>
-                <p class="text-xs text-dark-400 mt-0.5">{{ step.description }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- JSON template tab -->
-      <div v-show="activeTab === 'json'" class="p-4 space-y-4">
-        <div>
-          <h4 class="text-sm font-semibold text-white mb-2">Alert Message (Simulation Mode)</h4>
-          <pre class="bg-dark-950 rounded-lg p-3 text-xs font-mono text-yellow-400 overflow-auto">{{ simulationJson }}</pre>
-        </div>
-        
-        <div>
-          <h4 class="text-sm font-semibold text-white mb-2">Alert Message (Live Trading)</h4>
-          <pre class="bg-dark-950 rounded-lg p-3 text-xs font-mono text-red-400 overflow-auto">{{ realTradingJson }}</pre>
-          <p class="text-xs text-dark-500 mt-2">
-            <i class="fas fa-info-circle mr-1"></i>
-            Live trading requires timestamp and secret fields. Obtain your secret from the Webhook settings page.
-          </p>
-        </div>
-      </div>
     </div>
     
     <!-- Validation errors -->
@@ -169,55 +133,7 @@ const disclaimerAction = ref('copy') // 'copy' or 'download'
 
 const tabs = [
   { id: 'code', label: 'PineScript', shortLabel: 'Code', icon: 'fas fa-code' },
-  { id: 'setup', label: 'Setup Guide', shortLabel: 'Guide', icon: 'fas fa-book' },
-  { id: 'json', label: 'JSON Template', shortLabel: 'JSON', icon: 'fas fa-brackets-curly' },
 ]
-
-const setupSteps = [
-  { 
-    title: 'Copy the PineScript code', 
-    description: 'Click the "Copy" button to copy the generated code' 
-  },
-  { 
-    title: 'Paste in TradingView', 
-    description: 'Open the Pine Editor in TradingView, paste the code and save' 
-  },
-  { 
-    title: 'Add strategy to chart', 
-    description: 'Click "Add to Chart" to apply the strategy to your chart' 
-  },
-  { 
-    title: 'Set up alerts', 
-    description: 'Right-click strategy -> Add Alert -> Configure Webhook URL and Message' 
-  },
-  { 
-    title: 'Enter Webhook URL', 
-    description: 'Copy your Webhook URL from the Webhook settings page' 
-  },
-  { 
-    title: 'Enter Message', 
-    description: 'Copy the JSON template from the JSON tab and paste into the alert Message field' 
-  },
-]
-
-// JSON templates
-const simulationJson = computed(() => {
-  return `{
-    "action": "{{strategy.order.alert_message}}",
-    "symbol": "YOUR_SYMBOL",
-    "quantity": {{strategy.order.contracts}}
-}`
-})
-
-const realTradingJson = computed(() => {
-  return `{
-    "action": "{{strategy.order.alert_message}}",
-    "symbol": "YOUR_SYMBOL",
-    "quantity": {{strategy.order.contracts}},
-    "timestamp": "{{timenow}}",
-    "secret": "YOUR_WEBHOOK_SECRET"
-}`
-})
 
 // Validation status display
 const validationStatus = computed(() => {
