@@ -2,7 +2,7 @@
   <div class="h-screen flex flex-col" style="background: linear-gradient(180deg, #080a16 0%, #0b0e1c 100%);">
     <!-- Header -->
     <header
-      class="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06]"
+      class="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] relative z-[100]"
       style="background: #080a16;"
     >
       <!-- Left: branding + template -->
