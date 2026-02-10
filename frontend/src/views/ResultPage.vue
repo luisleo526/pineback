@@ -101,6 +101,9 @@
           <TradeTable :trades="result.trades ?? []" />
         </div>
       </div>
+
+      <!-- Voice AI chat -->
+      <VoiceChat :result="result" />
     </template>
   </div>
 </template>
@@ -114,6 +117,7 @@ import EquityChart from '../components/backtest/EquityChart.vue'
 import DrawdownChart from '../components/backtest/DrawdownChart.vue'
 import OhlcvChart from '../components/backtest/OhlcvChart.vue'
 import TradeTable from '../components/backtest/TradeTable.vue'
+import VoiceChat from '../components/VoiceChat.vue'
 
 const route = useRoute()
 const result = ref(null)
