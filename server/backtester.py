@@ -521,70 +521,51 @@ class Backtester:
         trades: List[TradeRecord],
         tf_index: pd.DatetimeIndex,
     ) -> List[Dict[str, Any]]:
-        """Build chart markers from order records, snapped to chart-TF candles."""
-        if not orders or len(tf_index) == 0:
+        """Build chart markers from trade records (not orders).
+
+        Each trade produces exactly one entry marker and one exit marker
+        (if the trade is closed). This avoids the issue where a single
+        order serves as both a long exit and short entry simultaneously.
+        """
+        if not trades or len(tf_index) == 0:
             return []
 
         markers: List[Dict[str, Any]] = []
 
-        # Build trade lookup by entry/exit time for PnL annotation
-        trade_by_exit = {}
-        trade_by_entry = {}
-        for t in trades:
-            if t.entry_time:
-                trade_by_entry[t.entry_time] = t
-            if t.exit_time:
-                trade_by_exit[t.exit_time] = t
-
-        for order in orders:
-            ts = pd.Timestamp(order.timestamp)
-
-            # Snap to nearest chart-TF candle
+        def snap_ts(ts_str: str) -> str:
+            """Snap a timestamp to the nearest chart-TF candle."""
+            ts = pd.Timestamp(ts_str)
             idx = tf_index.searchsorted(ts, side="right") - 1
             idx = max(0, min(idx, len(tf_index) - 1))
-            snapped_ts = tf_index[idx]
+            return tf_index[idx].isoformat()
 
-            is_buy = order.side == "Buy"
+        for t in trades:
+            is_long = t.direction == "Long"
 
-            # Try to find matching trade for direction and PnL
-            matching_exit = trade_by_exit.get(order.timestamp)
-            matching_entry = trade_by_entry.get(order.timestamp)
+            # Entry marker
+            if t.entry_time and t.entry_price:
+                markers.append({
+                    "timestamp": snap_ts(t.entry_time),
+                    "price": round(t.entry_price, 4),
+                    "side": "Buy" if is_long else "Sell",
+                    "direction": t.direction,
+                    "is_entry": True,
+                    "trade_id": t.trade_id,
+                    "label": "",
+                    "pnl": None,
+                })
 
-            if matching_exit:
-                # This order is an exit
-                direction = matching_exit.direction
-                pnl = matching_exit.pnl
-                is_entry = False
-            elif matching_entry:
-                # This order is an entry
-                direction = matching_entry.direction
-                pnl = None
-                is_entry = True
-            else:
-                # Fallback
-                direction = "Long" if is_buy else "Short"
-                pnl = None
-                is_entry = is_buy
-
-            # Build label
-            price_str = f"{order.price:.2f}"
-            if is_entry:
-                label = f"{'L' if direction == 'Long' else 'S'} {price_str}"
-            else:
-                pnl_str = ""
-                if pnl is not None:
-                    pnl_str = f" ({'+' if pnl > 0 else ''}{pnl:.2f})"
-                label = f"x {price_str}{pnl_str}"
-
-            markers.append({
-                "timestamp": snapped_ts.isoformat(),
-                "price": round(order.price, 4),
-                "side": order.side,
-                "direction": direction,
-                "is_entry": is_entry,
-                "trade_id": (matching_exit or matching_entry or type('', (), {'trade_id': None})).trade_id,
-                "label": label,
-                "pnl": pnl,
-            })
+            # Exit marker (only for closed trades)
+            if t.exit_time and t.exit_price:
+                markers.append({
+                    "timestamp": snap_ts(t.exit_time),
+                    "price": round(t.exit_price, 4),
+                    "side": "Sell" if is_long else "Buy",
+                    "direction": t.direction,
+                    "is_entry": False,
+                    "trade_id": t.trade_id,
+                    "label": "",
+                    "pnl": round(t.pnl, 2) if t.pnl else None,
+                })
 
         return markers
