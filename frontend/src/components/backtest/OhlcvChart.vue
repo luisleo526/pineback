@@ -71,22 +71,29 @@ function buildMarkers() {
     .map(m => {
       const isLong = m.direction === 'Long' || m.direction === 'long'
       const isEntry = m.is_entry
-      let position, color, shape
+      let position, color, shape, text
+
+      // TradingView style: small triangles, minimal text
       if (isLong && isEntry) {
-        position = 'belowBar'; color = '#22c55e'; shape = 'arrowUp'
+        position = 'belowBar'; color = '#2962FF'; shape = 'arrowUp'
+        text = 'Long'
       } else if (isLong && !isEntry) {
-        position = 'aboveBar'; color = '#ef4444'; shape = 'arrowDown'
+        position = 'aboveBar'; color = '#2962FF'; shape = 'arrowDown'
+        text = ''
       } else if (!isLong && isEntry) {
-        position = 'aboveBar'; color = '#f97316'; shape = 'arrowDown'
+        position = 'aboveBar'; color = '#e91e63'; shape = 'arrowDown'
+        text = 'Short'
       } else {
-        position = 'belowBar'; color = '#22c55e'; shape = 'arrowUp'
+        position = 'belowBar'; color = '#e91e63'; shape = 'arrowUp'
+        text = ''
       }
       return {
         time: toUnix(m.timestamp),
         position,
         color,
         shape,
-        text: m.label || '',
+        text,
+        size: 1,
       }
     })
     .sort((a, b) => a.time - b.time)
