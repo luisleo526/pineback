@@ -17,6 +17,7 @@
         <!-- Load Template dropdown -->
         <div class="relative" id="template-dropdown">
           <button
+            ref="templateBtnRef"
             @click="showTemplateMenu = !showTemplateMenu"
             class="glass-btn flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg"
           >
@@ -24,30 +25,35 @@
             Load Template
             <i class="fas fa-chevron-down text-[9px] opacity-50"></i>
           </button>
+        </div>
 
-          <div
-            v-if="showTemplateMenu"
-            class="absolute top-full left-0 mt-1 w-64 rounded-xl overflow-hidden z-50"
-            style="background: #141828; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.6);"
-          >
-            <div class="p-1 max-h-80 overflow-y-auto">
-              <button
-                v-for="t in templates"
-                :key="t.filename"
-                @click="loadTemplate(t)"
-                class="w-full text-left px-3 py-2.5 text-xs text-white/70 hover:text-white hover:bg-white/[0.06] rounded-lg transition-all"
-              >
-                {{ t.name }}
-              </button>
-              <div
-                v-if="templates.length === 0"
-                class="px-3 py-4 text-xs text-white/30 text-center"
-              >
-                <i class="fas fa-spinner fa-spin mr-1"></i> Loading...
+        <!-- Teleport dropdown to body so it's never clipped -->
+        <Teleport to="body">
+          <div v-if="showTemplateMenu">
+            <div class="fixed inset-0 z-[9998]" @click="showTemplateMenu = false"></div>
+            <div
+              class="fixed z-[9999] w-64 rounded-xl overflow-hidden"
+              :style="templateMenuStyle"
+            >
+              <div class="p-1 max-h-80 overflow-y-auto">
+                <button
+                  v-for="t in templates"
+                  :key="t.filename"
+                  @click="loadTemplate(t)"
+                  class="w-full text-left px-3 py-2.5 text-xs text-white/70 hover:text-white hover:bg-white/[0.06] rounded-lg transition-all"
+                >
+                  {{ t.name }}
+                </button>
+                <div
+                  v-if="templates.length === 0"
+                  class="px-3 py-4 text-xs text-white/30 text-center"
+                >
+                  <i class="fas fa-spinner fa-spin mr-1"></i> Loading...
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </Teleport>
       </div>
 
       <!-- Right: actions -->
@@ -116,17 +122,11 @@
       </div>
     </transition>
 
-    <!-- Template menu backdrop -->
-    <div
-      v-if="showTemplateMenu"
-      class="fixed inset-0 z-40"
-      @click="showTemplateMenu = false"
-    ></div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import StrategyBuilderPage from '../components/strategy-builder/StrategyBuilderPage.vue'
 import BacktestConfigPanel from '../components/backtest/BacktestConfigPanel.vue'
 import BacktestJobTracker from '../components/backtest/BacktestJobTracker.vue'
@@ -136,8 +136,22 @@ import { getStrategies } from '../api/index.js'
 // ── Refs ──────────────────────────────────────────────────────
 const builderRef = ref(null)
 const jobTrackerRef = ref(null)
+const templateBtnRef = ref(null)
 const showBacktestPanel = ref(true)
 const showTemplateMenu = ref(false)
+
+// Position the dropdown below the button using fixed positioning
+const templateMenuStyle = computed(() => {
+  if (!templateBtnRef.value) return { top: '48px', left: '140px' }
+  const rect = templateBtnRef.value.getBoundingClientRect()
+  return {
+    top: `${rect.bottom + 4}px`,
+    left: `${rect.left}px`,
+    background: '#141828',
+    border: '1px solid rgba(255,255,255,0.1)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+  }
+})
 const templates = ref([])
 const generatedCode = ref('')
 const activeResult = ref(null)
