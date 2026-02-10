@@ -1,0 +1,142 @@
+terraform {
+  required_version = ">= 1.5"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+# ── AMI: latest Amazon Linux 2023 (auto-resolved per region) ─────
+
+data "aws_ami" "al2023" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+# ── VPC: default or user-specified ───────────────────────────────
+
+data "aws_vpc" "selected" {
+  id      = var.vpc_id != "" ? var.vpc_id : null
+  default = var.vpc_id == "" ? true : null
+}
+
+data "aws_subnets" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.selected.id]
+  }
+}
+
+# ── Security Group ───────────────────────────────────────────────
+
+resource "aws_security_group" "backtest" {
+  name_prefix = "backtest-"
+  description = "Backtest system: HTTP, HTTPS, SSH"
+  vpc_id      = data.aws_vpc.selected.id
+
+  # HTTP
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTP"
+  }
+
+  # HTTPS
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTPS"
+  }
+
+  # SSH
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.allowed_ssh_cidr]
+    description = "SSH"
+  }
+
+  # All outbound
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "backtest-sg"
+  }
+}
+
+# ── EC2 Instance ─────────────────────────────────────────────────
+
+resource "aws_instance" "backtest" {
+  ami                    = data.aws_ami.al2023.id
+  instance_type          = var.instance_type
+  key_name               = var.key_pair_name
+  vpc_security_group_ids = [aws_security_group.backtest.id]
+  subnet_id              = var.subnet_id != "" ? var.subnet_id : data.aws_subnets.public.ids[0]
+
+  root_block_device {
+    volume_size = var.volume_size
+    volume_type = "gp3"
+  }
+
+  user_data = templatefile("${path.module}/user_data.sh.tpl", {
+    repo_url    = var.repo_url
+    domain_name = var.domain_name
+    admin_email = var.admin_email
+  })
+
+  tags = {
+    Name = "backtest-system"
+  }
+}
+
+# ── Elastic IP (stable public address) ──────────────────────────
+
+resource "aws_eip" "backtest" {
+  instance = aws_instance.backtest.id
+  domain   = "vpc"
+
+  tags = {
+    Name = "backtest-eip"
+  }
+}
+
+# ── Route 53 DNS Record ─────────────────────────────────────────
+
+data "aws_route53_zone" "hosted" {
+  name = var.hosted_zone_name
+}
+
+resource "aws_route53_record" "app" {
+  zone_id = data.aws_route53_zone.hosted.zone_id
+  name    = var.domain_name
+  type    = "A"
+  ttl     = 300
+  records = [aws_eip.backtest.public_ip]
+}

@@ -1,0 +1,35 @@
+# Terraform variables for deploying the backtest system.
+# Copy this file to terraform.tfvars and fill in your values.
+#
+# Usage:
+#   cp terraform.tfvars.example terraform.tfvars
+#   terraform init
+#   terraform plan
+#   terraform apply
+
+# ── Required ─────────────────────────────────────────────────────
+
+# Name of an existing EC2 key pair in your AWS account
+key_pair_name = "my-key-pair"
+
+# Git repository URL (HTTPS, must be publicly accessible for git clone)
+repo_url = "https://github.com/YOUR_USERNAME/backtest-system.git"
+
+# ── Domain & DNS ─────────────────────────────────────────────────
+# Change these to your own Route 53 hosted zone and desired subdomain.
+
+domain_name      = "backtest.example.com"
+hosted_zone_name = "example.com"
+admin_email      = "you@example.com"
+
+# ── Compute (optional — defaults shown) ──────────────────────────
+
+# aws_region    = "ap-southeast-1"
+# instance_type = "t3.large"    # t3.medium (4GB), t3.large (8GB), t3.xlarge (16GB)
+# volume_size   = 30            # GB
+
+# ── Network (optional) ──────────────────────────────────────────
+
+# allowed_ssh_cidr = "0.0.0.0/0"   # Restrict to your IP: "1.2.3.4/32"
+# vpc_id           = ""             # Empty = default VPC
+# subnet_id        = ""             # Empty = auto-select first public subnet
