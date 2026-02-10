@@ -1,0 +1,137 @@
+{
+  "name": "Bollinger Band Breakout",
+  "settings": {
+    "initialCapital": 10000,
+    "currency": "USD",
+    "orderSize": 100,
+    "orderType": "percent",
+    "pyramiding": 0,
+    "commission": 0.1,
+    "commissionType": "percent",
+    "slippage": 0
+  },
+  "signals": {
+    "longEntry": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g1",
+          "conditions": [
+            {
+              "id": "c1",
+              "left": { "type": "price", "source": "close" },
+              "operator": "gt",
+              "right": { "type": "variable", "variableId": "var_bbUpper" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "longExit": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g2",
+          "conditions": [
+            {
+              "id": "c2",
+              "left": { "type": "price", "source": "close" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_bbMiddle" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortEntry": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g3",
+          "conditions": [
+            {
+              "id": "c3",
+              "left": { "type": "price", "source": "close" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_bbLower" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortExit": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g4",
+          "conditions": [
+            {
+              "id": "c4",
+              "left": { "type": "price", "source": "close" },
+              "operator": "gt",
+              "right": { "type": "variable", "variableId": "var_bbMiddle" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    }
+  },
+  "variables": [
+    {
+      "id": "var_bbMiddle",
+      "name": "bbMiddle",
+      "type": "indicator",
+      "indicator": "bb",
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "bbLength" },
+        "mult": { "type": "input", "inputName": "bbMult" }
+      },
+      "outputIndex": 0
+    },
+    {
+      "id": "var_bbUpper",
+      "name": "bbUpper",
+      "type": "indicator",
+      "indicator": "bb",
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "bbLength" },
+        "mult": { "type": "input", "inputName": "bbMult" }
+      },
+      "outputIndex": 1
+    },
+    {
+      "id": "var_bbLower",
+      "name": "bbLower",
+      "type": "indicator",
+      "indicator": "bb",
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "bbLength" },
+        "mult": { "type": "input", "inputName": "bbMult" }
+      },
+      "outputIndex": 2
+    }
+  ],
+  "inputs": [
+    {
+      "id": "input_bbLength",
+      "name": "bbLength",
+      "type": "int",
+      "default": 20,
+      "min": 1
+    },
+    {
+      "id": "input_bbMult",
+      "name": "bbMult",
+      "type": "float",
+      "default": 2.0,
+      "min": 0.1
+    }
+  ]
+}

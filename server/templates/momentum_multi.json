@@ -1,0 +1,201 @@
+{
+  "name": "Multi Momentum",
+  "settings": {
+    "initialCapital": 10000,
+    "currency": "USD",
+    "orderSize": 100,
+    "orderType": "percent",
+    "pyramiding": 0,
+    "commission": 0.1,
+    "commissionType": "percent",
+    "slippage": 0
+  },
+  "signals": {
+    "longEntry": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_le1",
+          "conditions": [
+            {
+              "id": "c_le1a",
+              "left": { "type": "variable", "variableId": "var_myCCI" },
+              "operator": "gt",
+              "right": { "type": "constant", "value": 100 }
+            },
+            {
+              "id": "c_le1b",
+              "left": { "type": "variable", "variableId": "var_myMOM" },
+              "operator": "gt",
+              "right": { "type": "constant", "value": 0 }
+            }
+          ]
+        },
+        {
+          "id": "g_le2",
+          "conditions": [
+            {
+              "id": "c_le2a",
+              "left": { "type": "variable", "variableId": "var_myROC" },
+              "operator": "gt",
+              "right": { "type": "constant", "value": 5 }
+            },
+            {
+              "id": "c_le2b",
+              "left": { "type": "variable", "variableId": "var_myMFI" },
+              "operator": "gt",
+              "right": { "type": "constant", "value": 80 }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "longExit": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_lx1",
+          "conditions": [
+            {
+              "id": "c_lx1a",
+              "left": { "type": "variable", "variableId": "var_myCCI" },
+              "operator": "lt",
+              "right": { "type": "constant", "value": -100 }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortEntry": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_se1",
+          "conditions": [
+            {
+              "id": "c_se1a",
+              "left": { "type": "variable", "variableId": "var_myCCI" },
+              "operator": "lt",
+              "right": { "type": "constant", "value": -100 }
+            },
+            {
+              "id": "c_se1b",
+              "left": { "type": "variable", "variableId": "var_myMOM" },
+              "operator": "lt",
+              "right": { "type": "constant", "value": 0 }
+            }
+          ]
+        },
+        {
+          "id": "g_se2",
+          "conditions": [
+            {
+              "id": "c_se2a",
+              "left": { "type": "variable", "variableId": "var_myROC" },
+              "operator": "lt",
+              "right": { "type": "constant", "value": -5 }
+            },
+            {
+              "id": "c_se2b",
+              "left": { "type": "variable", "variableId": "var_myMFI" },
+              "operator": "lt",
+              "right": { "type": "constant", "value": 20 }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortExit": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_sx1",
+          "conditions": [
+            {
+              "id": "c_sx1a",
+              "left": { "type": "variable", "variableId": "var_myCCI" },
+              "operator": "gt",
+              "right": { "type": "constant", "value": 100 }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    }
+  },
+  "variables": [
+    {
+      "id": "var_myCCI",
+      "name": "myCCI",
+      "type": "indicator",
+      "indicator": "cci",
+      "params": {
+        "source": "hlc3",
+        "period": { "type": "input", "inputName": "cciPeriod" }
+      }
+    },
+    {
+      "id": "var_myMOM",
+      "name": "myMOM",
+      "type": "indicator",
+      "indicator": "mom",
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "momPeriod" }
+      }
+    },
+    {
+      "id": "var_myROC",
+      "name": "myROC",
+      "type": "indicator",
+      "indicator": "roc",
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "rocPeriod" }
+      }
+    },
+    {
+      "id": "var_myMFI",
+      "name": "myMFI",
+      "type": "indicator",
+      "indicator": "mfi",
+      "params": {
+        "source": "hlc3",
+        "period": { "type": "input", "inputName": "mfiPeriod" }
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "input_cciPeriod",
+      "name": "cciPeriod",
+      "type": "int",
+      "default": 20,
+      "min": 1
+    },
+    {
+      "id": "input_momPeriod",
+      "name": "momPeriod",
+      "type": "int",
+      "default": 10,
+      "min": 1
+    },
+    {
+      "id": "input_rocPeriod",
+      "name": "rocPeriod",
+      "type": "int",
+      "default": 14,
+      "min": 1
+    },
+    {
+      "id": "input_mfiPeriod",
+      "name": "mfiPeriod",
+      "type": "int",
+      "default": 14,
+      "min": 1
+    }
+  ]
+}

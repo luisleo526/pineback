@@ -1,0 +1,185 @@
+{
+  "name": "KC BB Squeeze",
+  "settings": {
+    "initialCapital": 10000,
+    "currency": "USD",
+    "orderSize": 100,
+    "orderType": "percent",
+    "pyramiding": 0,
+    "commission": 0.1,
+    "commissionType": "percent",
+    "slippage": 0
+  },
+  "signals": {
+    "longEntry": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_le1",
+          "conditions": [
+            {
+              "id": "c_le1a",
+              "left": { "type": "variable", "variableId": "var_myBBW" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_myKCW" }
+            },
+            {
+              "id": "c_le1b",
+              "left": { "type": "price", "source": "close" },
+              "operator": "gt",
+              "right": { "type": "variable", "variableId": "var_kcUpper" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "longExit": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_lx1",
+          "conditions": [
+            {
+              "id": "c_lx1a",
+              "left": { "type": "price", "source": "close" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_kcMiddle" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortEntry": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_se1",
+          "conditions": [
+            {
+              "id": "c_se1a",
+              "left": { "type": "variable", "variableId": "var_myBBW" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_myKCW" }
+            },
+            {
+              "id": "c_se1b",
+              "left": { "type": "price", "source": "close" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_kcLower" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortExit": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_sx1",
+          "conditions": [
+            {
+              "id": "c_sx1a",
+              "left": { "type": "price", "source": "close" },
+              "operator": "gt",
+              "right": { "type": "variable", "variableId": "var_kcMiddle" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    }
+  },
+  "variables": [
+    {
+      "id": "var_kcUpper",
+      "name": "kcUpper",
+      "type": "indicator",
+      "indicator": "kc",
+      "outputIndex": 1,
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "kcLength" },
+        "mult": { "type": "input", "inputName": "kcMult" }
+      }
+    },
+    {
+      "id": "var_kcMiddle",
+      "name": "kcMiddle",
+      "type": "indicator",
+      "indicator": "kc",
+      "outputIndex": 0,
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "kcLength" },
+        "mult": { "type": "input", "inputName": "kcMult" }
+      }
+    },
+    {
+      "id": "var_kcLower",
+      "name": "kcLower",
+      "type": "indicator",
+      "indicator": "kc",
+      "outputIndex": 2,
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "kcLength" },
+        "mult": { "type": "input", "inputName": "kcMult" }
+      }
+    },
+    {
+      "id": "var_myBBW",
+      "name": "myBBW",
+      "type": "indicator",
+      "indicator": "bbw",
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "bbLength" },
+        "mult": { "type": "input", "inputName": "bbMult" }
+      }
+    },
+    {
+      "id": "var_myKCW",
+      "name": "myKCW",
+      "type": "indicator",
+      "indicator": "kcw",
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "kcLength" },
+        "mult": { "type": "input", "inputName": "kcMult" }
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "input_kcLength",
+      "name": "kcLength",
+      "type": "int",
+      "default": 20,
+      "min": 1
+    },
+    {
+      "id": "input_kcMult",
+      "name": "kcMult",
+      "type": "float",
+      "default": 1.5,
+      "min": 0.1
+    },
+    {
+      "id": "input_bbLength",
+      "name": "bbLength",
+      "type": "int",
+      "default": 20,
+      "min": 1
+    },
+    {
+      "id": "input_bbMult",
+      "name": "bbMult",
+      "type": "float",
+      "default": 2.0,
+      "min": 0.1
+    }
+  ]
+}

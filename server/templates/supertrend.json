@@ -1,0 +1,88 @@
+{
+  "name": "SuperTrend",
+  "settings": {
+    "initialCapital": 10000,
+    "currency": "USD",
+    "orderSize": 100,
+    "orderType": "percent",
+    "pyramiding": 0,
+    "commission": 0.1,
+    "commissionType": "percent",
+    "slippage": 0
+  },
+  "signals": {
+    "longEntry": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g1",
+          "conditions": [
+            {
+              "id": "c1",
+              "left": { "type": "variable", "variableId": "var_stDirection" },
+              "operator": "eq",
+              "right": { "type": "constant", "value": -1 }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "longExit": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g2",
+          "conditions": [
+            {
+              "id": "c2",
+              "left": { "type": "variable", "variableId": "var_stDirection" },
+              "operator": "eq",
+              "right": { "type": "constant", "value": 1 }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortEntry": {
+      "enabled": false,
+      "groups": [],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortExit": {
+      "enabled": false,
+      "groups": [],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    }
+  },
+  "variables": [
+    {
+      "id": "var_stDirection",
+      "name": "stDirection",
+      "type": "indicator",
+      "indicator": "supertrend",
+      "params": {
+        "factor": { "type": "input", "inputName": "stFactor" },
+        "period": { "type": "input", "inputName": "stPeriod" }
+      },
+      "outputIndex": 1
+    }
+  ],
+  "inputs": [
+    {
+      "id": "input_stFactor",
+      "name": "stFactor",
+      "type": "float",
+      "default": 3.0,
+      "min": 0.1
+    },
+    {
+      "id": "input_stPeriod",
+      "name": "stPeriod",
+      "type": "int",
+      "default": 10,
+      "min": 1
+    }
+  ]
+}

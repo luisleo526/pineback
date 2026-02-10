@@ -1,0 +1,111 @@
+{
+  "name": "OBV Volume",
+  "settings": {
+    "initialCapital": 10000,
+    "currency": "USD",
+    "orderSize": 100,
+    "orderType": "percent",
+    "pyramiding": 0,
+    "commission": 0.1,
+    "commissionType": "percent",
+    "slippage": 0
+  },
+  "signals": {
+    "longEntry": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_le1",
+          "conditions": [
+            {
+              "id": "c_le1a",
+              "left": { "type": "variable", "variableId": "var_myOBV" },
+              "operator": "gt",
+              "right": { "type": "variable", "variableId": "var_obvSMA" }
+            },
+            {
+              "id": "c_le1b",
+              "left": { "type": "price", "source": "close" },
+              "operator": "gt",
+              "right": { "type": "variable", "variableId": "var_myVWAP" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "longExit": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_lx1",
+          "conditions": [
+            {
+              "id": "c_lx1a",
+              "left": { "type": "variable", "variableId": "var_myOBV" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_obvSMA" }
+            }
+          ]
+        },
+        {
+          "id": "g_lx2",
+          "conditions": [
+            {
+              "id": "c_lx2a",
+              "left": { "type": "price", "source": "close" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_myVWAP" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortEntry": {
+      "enabled": false,
+      "groups": [],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortExit": {
+      "enabled": false,
+      "groups": [],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    }
+  },
+  "variables": [
+    {
+      "id": "var_myOBV",
+      "name": "myOBV",
+      "type": "indicator",
+      "indicator": "obv",
+      "params": {}
+    },
+    {
+      "id": "var_myVWAP",
+      "name": "myVWAP",
+      "type": "indicator",
+      "indicator": "vwap",
+      "params": {}
+    },
+    {
+      "id": "var_obvSMA",
+      "name": "obvSMA",
+      "type": "indicator",
+      "indicator": "sma",
+      "params": {
+        "source": { "type": "variable", "variableId": "var_myOBV" },
+        "period": { "type": "input", "inputName": "obvSmaPeriod" }
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "input_obvSmaPeriod",
+      "name": "obvSmaPeriod",
+      "type": "int",
+      "default": 20,
+      "min": 1
+    }
+  ]
+}

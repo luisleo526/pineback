@@ -1,0 +1,151 @@
+{
+  "name": "MA Ribbon",
+  "settings": {
+    "initialCapital": 10000,
+    "currency": "USD",
+    "orderSize": 100,
+    "orderType": "percent",
+    "pyramiding": 0,
+    "commission": 0.1,
+    "commissionType": "percent",
+    "slippage": 0
+  },
+  "signals": {
+    "longEntry": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_le1",
+          "conditions": [
+            {
+              "id": "c_le1a",
+              "left": { "type": "variable", "variableId": "var_myHMA" },
+              "operator": "gt",
+              "right": { "type": "variable", "variableId": "var_myWMA" }
+            },
+            {
+              "id": "c_le1b",
+              "left": { "type": "variable", "variableId": "var_myHMA" },
+              "operator": "gt",
+              "right": { "type": "variable", "variableId": "var_myRMA" }
+            },
+            {
+              "id": "c_le1c",
+              "left": { "type": "variable", "variableId": "var_myHMA" },
+              "operator": "gt",
+              "right": { "type": "variable", "variableId": "var_myALMA" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "longExit": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_lx1",
+          "conditions": [
+            {
+              "id": "c_lx1a",
+              "left": { "type": "variable", "variableId": "var_myHMA" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_myWMA" }
+            },
+            {
+              "id": "c_lx1b",
+              "left": { "type": "variable", "variableId": "var_myHMA" },
+              "operator": "lt",
+              "right": { "type": "variable", "variableId": "var_myRMA" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortEntry": {
+      "enabled": false,
+      "groups": [],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortExit": {
+      "enabled": false,
+      "groups": [],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    }
+  },
+  "variables": [
+    {
+      "id": "var_myWMA",
+      "name": "myWMA",
+      "type": "indicator",
+      "indicator": "wma",
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "wmaPeriod" }
+      }
+    },
+    {
+      "id": "var_myHMA",
+      "name": "myHMA",
+      "type": "indicator",
+      "indicator": "hma",
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "hmaPeriod" }
+      }
+    },
+    {
+      "id": "var_myRMA",
+      "name": "myRMA",
+      "type": "indicator",
+      "indicator": "rma",
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "rmaPeriod" }
+      }
+    },
+    {
+      "id": "var_myALMA",
+      "name": "myALMA",
+      "type": "indicator",
+      "indicator": "alma",
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "almaPeriod" },
+        "offset": 0.85,
+        "sigma": 6.0
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "input_wmaPeriod",
+      "name": "wmaPeriod",
+      "type": "int",
+      "default": 20,
+      "min": 1
+    },
+    {
+      "id": "input_hmaPeriod",
+      "name": "hmaPeriod",
+      "type": "int",
+      "default": 9,
+      "min": 1
+    },
+    {
+      "id": "input_rmaPeriod",
+      "name": "rmaPeriod",
+      "type": "int",
+      "default": 14,
+      "min": 1
+    },
+    {
+      "id": "input_almaPeriod",
+      "name": "almaPeriod",
+      "type": "int",
+      "default": 9,
+      "min": 1
+    }
+  ]
+}

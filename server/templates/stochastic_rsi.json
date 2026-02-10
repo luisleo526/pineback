@@ -1,0 +1,132 @@
+{
+  "name": "Stochastic RSI Combo",
+  "settings": {
+    "initialCapital": 10000,
+    "currency": "USD",
+    "orderSize": 100,
+    "orderType": "percent",
+    "pyramiding": 0,
+    "commission": 0.1,
+    "commissionType": "percent",
+    "slippage": 0
+  },
+  "signals": {
+    "longEntry": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_le1",
+          "conditions": [
+            {
+              "id": "c_le1a",
+              "left": { "type": "variable", "variableId": "var_stochK" },
+              "operator": "crossover",
+              "right": { "type": "variable", "variableId": "var_stochD" }
+            },
+            {
+              "id": "c_le1b",
+              "left": { "type": "variable", "variableId": "var_myRSI" },
+              "operator": "lt",
+              "right": { "type": "input", "inputName": "rsiThreshold" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "longExit": {
+      "enabled": true,
+      "groups": [
+        {
+          "id": "g_lx1",
+          "conditions": [
+            {
+              "id": "c_lx1a",
+              "left": { "type": "variable", "variableId": "var_stochK" },
+              "operator": "crossunder",
+              "right": { "type": "variable", "variableId": "var_stochD" }
+            }
+          ]
+        }
+      ],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortEntry": {
+      "enabled": false,
+      "groups": [],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    },
+    "shortExit": {
+      "enabled": false,
+      "groups": [],
+      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+    }
+  },
+  "variables": [
+    {
+      "id": "var_stochK",
+      "name": "stochK",
+      "type": "indicator",
+      "indicator": "stoch",
+      "outputIndex": 0,
+      "params": {
+        "kPeriod": { "type": "input", "inputName": "stochPeriod" },
+        "kSmooth": { "type": "input", "inputName": "stochSmooth" },
+        "dPeriod": { "type": "input", "inputName": "stochSmooth" }
+      }
+    },
+    {
+      "id": "var_stochD",
+      "name": "stochD",
+      "type": "indicator",
+      "indicator": "stoch",
+      "outputIndex": 1,
+      "params": {
+        "kPeriod": { "type": "input", "inputName": "stochPeriod" },
+        "kSmooth": { "type": "input", "inputName": "stochSmooth" },
+        "dPeriod": { "type": "input", "inputName": "stochSmooth" }
+      }
+    },
+    {
+      "id": "var_myRSI",
+      "name": "myRSI",
+      "type": "indicator",
+      "indicator": "rsi",
+      "params": {
+        "source": "close",
+        "period": { "type": "input", "inputName": "rsiPeriod" }
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "input_stochPeriod",
+      "name": "stochPeriod",
+      "type": "int",
+      "default": 14,
+      "min": 1
+    },
+    {
+      "id": "input_stochSmooth",
+      "name": "stochSmooth",
+      "type": "int",
+      "default": 3,
+      "min": 1
+    },
+    {
+      "id": "input_rsiPeriod",
+      "name": "rsiPeriod",
+      "type": "int",
+      "default": 14,
+      "min": 1
+    },
+    {
+      "id": "input_rsiThreshold",
+      "name": "rsiThreshold",
+      "type": "int",
+      "default": 40,
+      "min": 1,
+      "max": 100
+    }
+  ]
+}
