@@ -1,0 +1,16 @@
+.git
+.gitignore
+.cursor
+backtest/
+infra/
+frontend/node_modules
+frontend/dist
+__pycache__
+*.pyc
+*.egg-info
+.venv
+venv
+.env
+*.log
+.DS_Store
+README.md

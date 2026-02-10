@@ -1,0 +1,63 @@
+# Production deployment: app + database + pgbouncer + nginx
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up -d --build
+#   docker compose -f docker-compose.prod.yml exec app python -m server.ingest
+#   # Open http://localhost (or https://your-domain.com with SSL)
+
+services:
+  db:
+    image: timescale/timescaledb:latest-pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: backtest
+      POSTGRES_USER: backtest
+      POSTGRES_PASSWORD: backtest
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./server/docker/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U backtest -d backtest"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://backtest:backtest@db:5432/backtest
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 100
+      DEFAULT_POOL_SIZE: 20
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - pgbouncer
+    environment:
+      DATABASE_URL: postgresql://backtest:backtest@pgbouncer:5432/backtest
+    volumes:
+      - ./spy_1min_2008_2021_cleaned.csv:/app/spy_1min_2008_2021_cleaned.csv:ro
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+
+volumes:
+  pgdata:
+  certbot-etc:
+  certbot-var:
