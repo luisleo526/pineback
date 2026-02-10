@@ -12,9 +12,11 @@ import httpx
 
 from fastapi import APIRouter, HTTPException, Request, Response
 
+from ..secrets import get_secret
+
 router = APIRouter(prefix="/api/realtime", tags=["realtime"])
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
 OPENAI_REALTIME_URL = "https://api.openai.com/v1/realtime/calls"
 
 # ── Tool definitions for the voice agent ──────────────────────

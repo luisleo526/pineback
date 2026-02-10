@@ -41,6 +41,8 @@ services:
       - pgbouncer
     environment:
       DATABASE_URL: postgresql://backtest:backtest@pgbouncer:5432/backtest
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-ap-southeast-1}
+      OPENAI_SECRET_NAME: ${OPENAI_SECRET_NAME:-}
     volumes:
       - ./spy_1min_2008_2021_cleaned.csv:/app/spy_1min_2008_2021_cleaned.csv:ro
 
