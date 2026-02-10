@@ -16,6 +16,138 @@ const emit = defineEmits(['load-template', 'tour-complete', 'start-tour', 'open-
 
 let tour = null
 
+// ─────────────────────────────────────────────────────────────
+// Multi-element spotlight: patch the SVG overlay to cut extra
+// holes for elements that should be visible alongside the
+// primary attachTo target.
+// ─────────────────────────────────────────────────────────────
+
+let _extraCutoutRaf = null      // RAF handle for the sync loop
+let _extraCutoutObserver = null  // MutationObserver on the <path>
+
+/**
+ * Generate an SVG rounded-rect sub-path (same winding direction
+ * shepherd uses for the primary cutout so the evenodd fill rule
+ * punches a transparent hole).
+ */
+function _svgRoundedRect(x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2)
+  return (
+    `M${x + r},${y}` +
+    `a${r},${r},0,0,0-${r},${r}` +
+    `V${y + h - r}` +
+    `a${r},${r},0,0,0,${r},${r}` +
+    `H${x + w - r}` +
+    `a${r},${r},0,0,0,${r}-${r}` +
+    `V${y + r}` +
+    `a${r},${r},0,0,0-${r}-${r}` +
+    `Z`
+  )
+}
+
+/**
+ * Build extra cutout path fragments for a list of elements.
+ * Each element gets the same padding/radius as the primary spotlight.
+ */
+function _buildExtraCutouts(selectors, padding = 14, radius = 10) {
+  let extra = ''
+  for (const sel of selectors) {
+    const el = document.querySelector(sel)
+    if (!el) continue
+    const rect = el.getBoundingClientRect()
+    if (rect.width === 0 && rect.height === 0) continue
+    extra += _svgRoundedRect(
+      rect.x - padding,
+      rect.y - padding,
+      rect.width + padding * 2,
+      rect.height + padding * 2,
+      radius,
+    )
+  }
+  return extra
+}
+
+/**
+ * Apply the glow effect to extra spotlighted elements so they
+ * match the primary target's visual treatment.
+ */
+function _applyExtraGlow(selectors) {
+  for (const sel of selectors) {
+    const el = document.querySelector(sel)
+    if (el) el.classList.add('shepherd-extra-target')
+  }
+}
+
+function _removeExtraGlow(selectors) {
+  for (const sel of selectors) {
+    const el = document.querySelector(sel)
+    if (el) el.classList.remove('shepherd-extra-target')
+  }
+}
+
+/**
+ * Inject extra cutouts into the overlay SVG path.
+ * Called repeatedly via RAF to stay in sync with shepherd's own
+ * updates to the <path d="..."> attribute.
+ */
+function _injectExtraCutouts(selectors) {
+  const svgPath = document.querySelector('.shepherd-modal-overlay-container path')
+  if (!svgPath) return
+
+  const extra = _buildExtraCutouts(selectors)
+  if (!extra) return
+
+  const current = svgPath.getAttribute('d') || ''
+  // Only append if our cutouts aren't already there (avoid duplication).
+  // We use a marker comment-like substring for detection.
+  if (!current.includes(extra)) {
+    svgPath.setAttribute('d', current + extra)
+  }
+}
+
+/**
+ * Start a RAF loop that continuously re-injects extra cutouts.
+ * Shepherd overwrites the path's `d` attribute every frame via its
+ * own RAF loop, so we must re-apply after each shepherd update.
+ */
+function _startExtraCutoutSync(selectors) {
+  _stopExtraCutoutSync()
+  _applyExtraGlow(selectors)
+
+  const loop = () => {
+    _injectExtraCutouts(selectors)
+    _extraCutoutRaf = requestAnimationFrame(loop)
+  }
+  _extraCutoutRaf = requestAnimationFrame(loop)
+}
+
+function _stopExtraCutoutSync(selectors) {
+  if (_extraCutoutRaf) {
+    cancelAnimationFrame(_extraCutoutRaf)
+    _extraCutoutRaf = null
+  }
+  if (_extraCutoutObserver) {
+    _extraCutoutObserver.disconnect()
+    _extraCutoutObserver = null
+  }
+  if (selectors) _removeExtraGlow(selectors)
+}
+
+/**
+ * Create `when` hooks for a step that needs extra elements spotlighted.
+ */
+function _multiSpotlight(selectors) {
+  return {
+    show() { _startExtraCutoutSync(selectors) },
+    hide() { _stopExtraCutoutSync(selectors) },
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────
+// Tour definition
+// ─────────────────────────────────────────────────────────────
+
 function createTour() {
   tour = new Shepherd.Tour({
     useModalOverlay: true,
@@ -23,19 +155,20 @@ function createTour() {
       classes: 'shepherd-theme-custom',
       scrollTo: { behavior: 'smooth', block: 'center' },
       cancelIcon: { enabled: true },
-      modalOverlayOpeningPadding: 12,
+      modalOverlayOpeningPadding: 14,
       modalOverlayOpeningRadius: 10,
       popperOptions: {
         modifiers: [
           { name: 'offset', options: { offset: [0, 20] } },
-          { name: 'preventOverflow', options: { padding: 20 } },
+          { name: 'preventOverflow', options: { padding: 24, altAxis: true } },
           { name: 'flip', options: { fallbackPlacements: ['right', 'left', 'top', 'bottom'] } },
+          { name: 'shift', enabled: true },
         ],
       },
     },
   })
 
-  // Step 1: Welcome (read)
+  // Step 1: Welcome (centered, no target)
   tour.addStep({
     id: 'welcome',
     title: 'Welcome to PineBack',
@@ -50,6 +183,8 @@ function createTour() {
   })
 
   // Step 2: Open template dropdown (action)
+  // Target is in the top-left header. Tooltip goes RIGHT so it
+  // doesn't cover the dropdown that will appear below.
   tour.addStep({
     id: 'open-template',
     title: 'Load a Strategy Template',
@@ -57,12 +192,14 @@ function createTour() {
       <p>Click this dropdown to see 12 pre-built strategy templates.</p>
       <p class="text-xs opacity-40 mt-2">Step 2 of 12 · Click the button to continue</p>
     `,
-    attachTo: { element: '#template-dropdown', on: 'bottom' },
+    attachTo: { element: '#template-dropdown', on: 'right' },
     advanceOn: { selector: '#template-dropdown button', event: 'click' },
     buttons: [],
   })
 
-  // Step 3: Select MACD (action) — advanced programmatically from BacktestApp.loadTemplate()
+  // Step 3: Select MACD from the open dropdown (action)
+  // Tooltip goes RIGHT of the dropdown button. Extra spotlight
+  // on the teleported dropdown menu so the user can see both.
   tour.addStep({
     id: 'select-template',
     title: 'Select MACD Crossover',
@@ -70,11 +207,13 @@ function createTour() {
       <p>Click <strong>"MACD Crossover"</strong> from the list to load it into the builder.</p>
       <p class="text-xs opacity-40 mt-2">Step 3 of 12 · Click a template to continue</p>
     `,
-    attachTo: { element: '#template-dropdown', on: 'bottom' },
+    attachTo: { element: '#template-dropdown', on: 'right' },
     buttons: [],
+    when: _multiSpotlight(['.fixed.z-\\[9999\\].w-64']),
   })
 
   // Step 4: Click Long Exit tab (action)
+  // Signal tabs are near the top of the main area → tooltip below.
   tour.addStep({
     id: 'click-long-exit',
     title: 'Explore Signal Conditions',
@@ -86,9 +225,16 @@ function createTour() {
     attachTo: { element: '[data-signal="longExit"]', on: 'bottom' },
     advanceOn: { selector: '[data-signal="longExit"]', event: 'click' },
     buttons: [],
+    when: _multiSpotlight([
+      '[data-signal="longEntry"]',
+      '[data-signal="longExit"]',
+    ]),
   })
 
-  // Step 5: Inspect condition (read)
+  // Step 5: Inspect condition row (read-only)
+  // Condition rows are in the mid-scrollable area → tooltip ABOVE
+  // so the full row content stays visible. Extra spotlight on the
+  // active signal tab for context.
   tour.addStep({
     id: 'inspect-condition',
     title: 'Understanding Conditions',
@@ -102,14 +248,16 @@ function createTour() {
       <p class="mt-2 text-sm opacity-70">Here, <em>macdLine crossunder signalLine</em> triggers a long exit.</p>
       <p class="text-xs opacity-40 mt-2">Step 5 of 12</p>
     `,
-    attachTo: { element: '.condition-row', on: 'bottom' },
+    attachTo: { element: '.condition-row', on: 'top' },
     buttons: [
       { text: '← Back', action: tour.back, classes: 'shepherd-button-secondary' },
       { text: 'Next →', action: tour.next, classes: 'shepherd-button-primary' },
     ],
+    when: _multiSpotlight(['[data-signal="longExit"]']),
   })
 
   // Step 6: Click Variables tab (action)
+  // Tab is in the top-right of the builder → tooltip below.
   tour.addStep({
     id: 'click-variables',
     title: 'Custom Variables',
@@ -122,7 +270,9 @@ function createTour() {
     buttons: [],
   })
 
-  // Step 7: Inspect variables (read)
+  // Step 7: Inspect variables panel (read-only)
+  // Attach to the variables tab, tooltip below. Extra spotlight on
+  // the variables content area so the user can read the definitions.
   tour.addStep({
     id: 'inspect-variables',
     title: 'Strategy Variables',
@@ -136,9 +286,11 @@ function createTour() {
       { text: '← Back', action: tour.back, classes: 'shepherd-button-secondary' },
       { text: 'Next →', action: tour.next, classes: 'shepherd-button-primary' },
     ],
+    when: _multiSpotlight(['.variables-panel']),
   })
 
-  // Step 8: Click Backtest button (action)
+  // Step 8: Click Backtest button in the header (action)
+  // Button is in the top-right header → tooltip below.
   tour.addStep({
     id: 'click-backtest',
     title: 'Backtest Configuration',
@@ -152,6 +304,8 @@ function createTour() {
   })
 
   // Step 9: Select timeframe (action or skip)
+  // Timeframe select is near the top of the right slide panel →
+  // tooltip LEFT (into the main content area where there's space).
   tour.addStep({
     id: 'select-timeframe',
     title: 'Select Timeframe',
@@ -166,13 +320,15 @@ function createTour() {
     ],
   })
 
-  // Step 10: Set dates (action with conditional Next)
+  // Step 10: Set date range (action)
+  // Date inputs are in the right panel → tooltip LEFT.
+  // Extra spotlight on the magnifier toggle since we mention it.
   tour.addStep({
     id: 'set-dates',
     title: 'Set Date Range',
     text: `
       <p>Enter a date range (e.g., <strong>2015-01-01</strong> to <strong>2020-12-31</strong>).</p>
-      <p class="mt-1 text-sm opacity-70">Notice the <em>Magnifier</em> toggle — when ON, the backtest uses intra-bar fills for more realistic results.</p>
+      <p class="mt-1 text-sm opacity-70">Notice the <em>Magnifier</em> toggle below — when ON, the backtest uses intra-bar fills for more realistic results.</p>
       <p class="text-xs opacity-40 mt-2">Step 10 of 12 · Fill both dates, then click Next</p>
     `,
     attachTo: { element: '#date-range-inputs', on: 'left' },
@@ -180,9 +336,12 @@ function createTour() {
       { text: '← Back', action: tour.back, classes: 'shepherd-button-secondary' },
       { text: 'Next →', action: tour.next, classes: 'shepherd-button-primary' },
     ],
+    when: _multiSpotlight(['#magnifier-toggle']),
   })
 
   // Step 11: Run Backtest (action)
+  // Button is lower in the right panel → tooltip on TOP so it
+  // doesn't get pushed off-screen and the button stays clickable.
   tour.addStep({
     id: 'run-backtest',
     title: 'Run Your Backtest!',
@@ -191,12 +350,12 @@ function createTour() {
       <p class="mt-1 text-sm opacity-70">The system will compile your PineScript, load SPY data, and run the backtest with progress tracking.</p>
       <p class="text-xs opacity-40 mt-2">Step 11 of 12 · Click Run Backtest to continue</p>
     `,
-    attachTo: { element: '#run-backtest-btn', on: 'left' },
+    attachTo: { element: '#run-backtest-btn', on: 'top' },
     advanceOn: { selector: '#run-backtest-btn', event: 'click' },
     buttons: [],
   })
 
-  // Step 12: View Results (action)
+  // Step 12: View Results (centered, no target)
   tour.addStep({
     id: 'view-results',
     title: 'Watch Progress & View Results',
@@ -216,11 +375,13 @@ function createTour() {
   })
 
   tour.on('complete', () => {
+    _stopExtraCutoutSync()
     localStorage.setItem('tour_completed', 'true')
     emit('tour-complete')
   })
 
   tour.on('cancel', () => {
+    _stopExtraCutoutSync()
     localStorage.setItem('tour_completed', 'true')
   })
 }
@@ -249,6 +410,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  _stopExtraCutoutSync()
   if (tour) {
     tour.cancel()
     tour = null
@@ -404,7 +566,8 @@ defineExpose({ startTour, advanceIfActive })
 }
 
 /* ── Target highlight — bright animated glow ──────────── */
-.shepherd-has-active-tour .shepherd-target {
+.shepherd-has-active-tour .shepherd-target,
+.shepherd-has-active-tour .shepherd-extra-target {
   position: relative;
   z-index: 9999 !important;
   box-shadow:
