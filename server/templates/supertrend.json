@@ -19,14 +19,23 @@
           "conditions": [
             {
               "id": "c1",
-              "left": { "type": "variable", "variableId": "var_stDirection" },
+              "left": {
+                "type": "variable",
+                "variableId": "var_stDirection"
+              },
               "operator": "eq",
-              "right": { "type": "constant", "value": -1 }
+              "right": {
+                "type": "constant",
+                "value": -1
+              }
             }
           ]
         }
       ],
-      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+      "exitSettings": {
+        "takeProfitEnabled": false,
+        "stopLossEnabled": false
+      }
     },
     "longExit": {
       "enabled": true,
@@ -36,14 +45,23 @@
           "conditions": [
             {
               "id": "c2",
-              "left": { "type": "variable", "variableId": "var_stDirection" },
+              "left": {
+                "type": "variable",
+                "variableId": "var_stDirection"
+              },
               "operator": "eq",
-              "right": { "type": "constant", "value": 1 }
+              "right": {
+                "type": "constant",
+                "value": 1
+              }
             }
           ]
         }
       ],
-      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+      "exitSettings": {
+        "takeProfitEnabled": false,
+        "stopLossEnabled": false
+      }
     },
     "shortEntry": {
       "enabled": true,
@@ -53,14 +71,23 @@
           "conditions": [
             {
               "id": "sc_se1a",
-              "left": { "type": "variable", "variableId": "var_stDirection" },
+              "left": {
+                "type": "variable",
+                "variableId": "var_stDirection"
+              },
               "operator": "eq",
-              "right": { "type": "constant", "value": 1 }
+              "right": {
+                "type": "constant",
+                "value": 1
+              }
             }
           ]
         }
       ],
-      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+      "exitSettings": {
+        "takeProfitEnabled": false,
+        "stopLossEnabled": false
+      }
     },
     "shortExit": {
       "enabled": true,
@@ -70,14 +97,23 @@
           "conditions": [
             {
               "id": "sc_sx1a",
-              "left": { "type": "variable", "variableId": "var_stDirection" },
+              "left": {
+                "type": "variable",
+                "variableId": "var_stDirection"
+              },
               "operator": "eq",
-              "right": { "type": "constant", "value": -1 }
+              "right": {
+                "type": "constant",
+                "value": -1
+              }
             }
           ]
         }
       ],
-      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+      "exitSettings": {
+        "takeProfitEnabled": false,
+        "stopLossEnabled": false
+      }
     }
   },
   "variables": [
@@ -87,8 +123,14 @@
       "type": "indicator",
       "indicator": "supertrend",
       "params": {
-        "factor": { "type": "input", "inputName": "stFactor" },
-        "period": { "type": "input", "inputName": "stPeriod" }
+        "factor": {
+          "type": "input",
+          "inputName": "stFactor"
+        },
+        "atrPeriod": {
+          "type": "input",
+          "inputName": "stPeriod"
+        }
       },
       "outputIndex": 1
     }

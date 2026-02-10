@@ -19,14 +19,23 @@
           "conditions": [
             {
               "id": "c1",
-              "left": { "type": "variable", "variableId": "var_macdLine" },
+              "left": {
+                "type": "variable",
+                "variableId": "var_macdLine"
+              },
               "operator": "crossover",
-              "right": { "type": "variable", "variableId": "var_signalLine" }
+              "right": {
+                "type": "variable",
+                "variableId": "var_signalLine"
+              }
             }
           ]
         }
       ],
-      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+      "exitSettings": {
+        "takeProfitEnabled": false,
+        "stopLossEnabled": false
+      }
     },
     "longExit": {
       "enabled": true,
@@ -36,14 +45,23 @@
           "conditions": [
             {
               "id": "c2",
-              "left": { "type": "variable", "variableId": "var_macdLine" },
+              "left": {
+                "type": "variable",
+                "variableId": "var_macdLine"
+              },
               "operator": "crossunder",
-              "right": { "type": "variable", "variableId": "var_signalLine" }
+              "right": {
+                "type": "variable",
+                "variableId": "var_signalLine"
+              }
             }
           ]
         }
       ],
-      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+      "exitSettings": {
+        "takeProfitEnabled": false,
+        "stopLossEnabled": false
+      }
     },
     "shortEntry": {
       "enabled": true,
@@ -53,14 +71,23 @@
           "conditions": [
             {
               "id": "sc_se1a",
-              "left": { "type": "variable", "variableId": "var_macdLine" },
+              "left": {
+                "type": "variable",
+                "variableId": "var_macdLine"
+              },
               "operator": "crossunder",
-              "right": { "type": "variable", "variableId": "var_signalLine" }
+              "right": {
+                "type": "variable",
+                "variableId": "var_signalLine"
+              }
             }
           ]
         }
       ],
-      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+      "exitSettings": {
+        "takeProfitEnabled": false,
+        "stopLossEnabled": false
+      }
     },
     "shortExit": {
       "enabled": true,
@@ -70,14 +97,23 @@
           "conditions": [
             {
               "id": "sc_sx1a",
-              "left": { "type": "variable", "variableId": "var_macdLine" },
+              "left": {
+                "type": "variable",
+                "variableId": "var_macdLine"
+              },
               "operator": "crossover",
-              "right": { "type": "variable", "variableId": "var_signalLine" }
+              "right": {
+                "type": "variable",
+                "variableId": "var_signalLine"
+              }
             }
           ]
         }
       ],
-      "exitSettings": { "takeProfitEnabled": false, "stopLossEnabled": false }
+      "exitSettings": {
+        "takeProfitEnabled": false,
+        "stopLossEnabled": false
+      }
     }
   },
   "variables": [
@@ -88,9 +124,18 @@
       "indicator": "macd",
       "params": {
         "source": "close",
-        "fastLength": { "type": "input", "inputName": "fastLength" },
-        "slowLength": { "type": "input", "inputName": "slowLength" },
-        "signalLength": { "type": "input", "inputName": "signalLength" }
+        "fastPeriod": {
+          "type": "input",
+          "inputName": "fastPeriod"
+        },
+        "slowPeriod": {
+          "type": "input",
+          "inputName": "slowPeriod"
+        },
+        "signalPeriod": {
+          "type": "input",
+          "inputName": "signalPeriod"
+        }
       },
       "outputIndex": 0
     },
@@ -101,31 +146,40 @@
       "indicator": "macd",
       "params": {
         "source": "close",
-        "fastLength": { "type": "input", "inputName": "fastLength" },
-        "slowLength": { "type": "input", "inputName": "slowLength" },
-        "signalLength": { "type": "input", "inputName": "signalLength" }
+        "fastPeriod": {
+          "type": "input",
+          "inputName": "fastPeriod"
+        },
+        "slowPeriod": {
+          "type": "input",
+          "inputName": "slowPeriod"
+        },
+        "signalPeriod": {
+          "type": "input",
+          "inputName": "signalPeriod"
+        }
       },
       "outputIndex": 1
     }
   ],
   "inputs": [
     {
-      "id": "input_fastLength",
-      "name": "fastLength",
+      "id": "input_fastPeriod",
+      "name": "fastPeriod",
       "type": "int",
       "default": 12,
       "min": 1
     },
     {
-      "id": "input_slowLength",
-      "name": "slowLength",
+      "id": "input_slowPeriod",
+      "name": "slowPeriod",
       "type": "int",
       "default": 26,
       "min": 1
     },
     {
-      "id": "input_signalLength",
-      "name": "signalLength",
+      "id": "input_signalPeriod",
+      "name": "signalPeriod",
       "type": "int",
       "default": 9,
       "min": 1
