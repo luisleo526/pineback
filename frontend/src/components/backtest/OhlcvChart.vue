@@ -83,17 +83,17 @@ function buildTradeSeriesData() {
     const time = toUnix(m.timestamp)
     const price = m.price
 
-    // Shapes: circle = entry, square = exit
-    // Colors: blue (#2962FF) = long, pink (#e91e63) = short
+    // Use arrowUp/arrowDown at exact price via hidden line series
+    // Blue = long, Pink = short, size 1 = small and clean
     if (isLong) {
       longData.push({ time, value: price })
       longMarkers.push({
         time,
         position: 'inBar',
         color: '#2962FF',
-        shape: isEntry ? 'circle' : 'square',
-        text: isEntry ? 'L' : '',
-        size: 2,
+        shape: isEntry ? 'arrowUp' : 'arrowDown',
+        text: '',
+        size: 1,
       })
     } else {
       shortData.push({ time, value: price })
@@ -101,9 +101,9 @@ function buildTradeSeriesData() {
         time,
         position: 'inBar',
         color: '#e91e63',
-        shape: isEntry ? 'circle' : 'square',
-        text: isEntry ? 'S' : '',
-        size: 2,
+        shape: isEntry ? 'arrowDown' : 'arrowUp',
+        text: '',
+        size: 1,
       })
     }
   }
