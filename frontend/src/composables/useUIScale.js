@@ -1,8 +1,10 @@
 /**
  * Global UI scale composable.
  *
- * Uses CSS `zoom` on <html> to uniformly scale everything —
+ * Uses CSS `zoom` on #app to uniformly scale everything —
  * text, padding, icons, borders, spacing, charts.
+ * Applied to #app (not <html>) so that overlay libraries like
+ * Shepherd.js keep correct getBoundingClientRect() coordinates.
  * The chosen scale is persisted in localStorage.
  */
 
@@ -26,13 +28,19 @@ function loadScale() {
 }
 
 function applyZoom(value) {
-  document.documentElement.style.zoom = String(value)
+  const el = document.getElementById('app')
+  if (el) {
+    el.style.zoom = String(value)
+  }
 }
 
 const scale = ref(loadScale())
 
-// Apply immediately on module load
+// Apply immediately if #app exists, otherwise defer to DOMContentLoaded
 applyZoom(scale.value)
+if (!document.getElementById('app')) {
+  document.addEventListener('DOMContentLoaded', () => applyZoom(scale.value), { once: true })
+}
 
 // Reactively sync changes to DOM + localStorage
 watch(scale, (val) => {

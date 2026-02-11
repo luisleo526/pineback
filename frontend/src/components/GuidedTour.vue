@@ -314,6 +314,13 @@ function createTour() {
     buttons: [
       { text: 'Next →', action: tour.next, classes: 'shepherd-button-primary' },
     ],
+    beforeShowPromise() {
+      return new Promise((resolve) => {
+        const el = document.getElementById('timeframe-select')
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        setTimeout(resolve, 350)
+      })
+    },
   })
 
   // Step 10: Set date range (action)
@@ -333,11 +340,18 @@ function createTour() {
       { text: 'Next →', action: tour.next, classes: 'shepherd-button-primary' },
     ],
     when: _multiSpotlight(['#magnifier-toggle']),
+    beforeShowPromise() {
+      return new Promise((resolve) => {
+        const el = document.getElementById('date-range-inputs')
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        setTimeout(resolve, 350)
+      })
+    },
   })
 
   // Step 11: Run Backtest (action)
-  // Button is lower in the right panel → tooltip on TOP so it
-  // doesn't get pushed off-screen and the button stays clickable.
+  // Button is inside a scrollable right panel → scroll it into view
+  // first, then attach tooltip on LEFT so it doesn't cover the button.
   tour.addStep({
     id: 'run-backtest',
     title: 'Run Your Backtest!',
@@ -346,9 +360,20 @@ function createTour() {
       <p class="mt-1 text-sm opacity-70">The system will compile your PineScript, load SPY data, and run the backtest with progress tracking.</p>
       <p class="text-xs opacity-40 mt-2">Step 11 of 12 · Click Run Backtest to continue</p>
     `,
-    attachTo: { element: '#run-backtest-btn', on: 'top' },
+    attachTo: { element: '#run-backtest-btn', on: 'left' },
     advanceOn: { selector: '#run-backtest-btn', event: 'click' },
     buttons: [],
+    beforeShowPromise() {
+      return new Promise((resolve) => {
+        const btn = document.getElementById('run-backtest-btn')
+        if (btn) {
+          btn.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          setTimeout(resolve, 350)
+        } else {
+          resolve()
+        }
+      })
+    },
   })
 
   // Step 12: View Results (centered, no target)

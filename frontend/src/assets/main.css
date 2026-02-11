@@ -9,6 +9,10 @@ body {
   padding: 0;
 }
 
+#app {
+  min-height: 100vh;
+}
+
 code, pre, .font-mono {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
 }
