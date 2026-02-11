@@ -354,7 +354,11 @@ class Backtester:
             n_days = (returns.index[-1] - returns.index[0]).days
             if n_days > 0:
                 annualized_return = ((1 + total_return) ** (365.25 / n_days) - 1) * 100
-                annualized_vol = float(returns.std() * (252 ** 0.5) * 100)
+                # Derive bars-per-year from the actual return series length
+                # and calendar span, so it works for any timeframe/magnifier.
+                n_bars = len(returns)
+                bars_per_year = n_bars * (365.25 / n_days) if n_days > 0 else 252
+                annualized_vol = float(returns.std() * (bars_per_year ** 0.5) * 100)
             else:
                 annualized_return = None
                 annualized_vol = None
