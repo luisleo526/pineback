@@ -220,8 +220,8 @@ const timeframes = [
 // ── Reactive config state ─────────────────────────────────────
 const config = reactive({
   timeframe: '1h',
-  startDate: '',
-  endDate: '',
+  startDate: '2021-03-01',
+  endDate: '2021-05-01',
   initialCapital: 10000,
   commission: 0.1,
   slippage: 0.05,
