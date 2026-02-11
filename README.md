@@ -194,7 +194,7 @@ terraform init && terraform apply
   - FastAPI backtest server patterns
   - Frontend charting with lightweight-charts
 - Strategy builder migrated from an existing Vue 3 project using agent-guided refactoring
-- **40+ incremental commits** reflecting the AI-driven development process
+- **110+ incremental commits** reflecting the AI-driven development process
 - Systematic verification: all 12 templates tested end-to-end (compiler → signals → trades)
 
 ## Tech Stack

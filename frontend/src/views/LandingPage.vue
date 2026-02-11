@@ -476,6 +476,7 @@
                 <span class="px-2 py-1 rounded bg-dark-700 text-dark-300">GET /api/strategies</span>
                 <span class="px-2 py-1 rounded bg-dark-700 text-dark-300">POST /api/compile</span>
                 <span class="px-2 py-1 rounded bg-dark-700 text-dark-300">GET /api/symbols</span>
+                <span class="px-2 py-1 rounded bg-dark-700 text-rose-300">POST /api/voice/session</span>
               </div>
             </div>
 
@@ -904,6 +905,12 @@ const features = [
     useCase: 'Get instant spoken insights on strategy performance',
     icon: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" /></svg>',
   },
+  {
+    title: 'Interactive Guided Tutorial',
+    description: 'Step-by-step walkthrough for first-time users powered by shepherd.js. Forced-action steps guide you through building a strategy, running a backtest, and reading the results.',
+    useCase: 'Experience the full workflow in 3 minutes',
+    icon: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" /></svg>',
+  },
 ]
 
 // Metrics — must match the 4×4 grid in StatsCards.vue
@@ -952,6 +959,7 @@ const techStack = [
       { name: 'Vite', abbr: 'Vi', role: 'Build tool + HMR' },
       { name: 'Tailwind CSS', abbr: 'TW', role: 'Utility-first styling' },
       { name: 'lightweight-charts', abbr: 'LC', role: 'TradingView charting' },
+      { name: 'shepherd.js', abbr: 'Sh', role: 'Interactive guided tour' },
     ],
   },
   {
@@ -975,13 +983,14 @@ const assumptions = [
   { title: 'Configurable Commission & Slippage', detail: 'Default: 0.1% commission, 0.05% slippage per trade. Both are configurable in the backtest config panel to model different broker scenarios.' },
   { title: 'Magnifier vs Standard Mode', detail: 'Standard mode fills at bar close. Magnifier mode resamples higher-TF signals to 1-min candles for realistic intra-bar execution — critical for accurate limit/stop orders.' },
   { title: 'Voice AI requires OPENAI_API_KEY', detail: 'The Voice AI Agent on the result page uses OpenAI\'s Realtime API (gpt-4o-mini-realtime-preview) over WebRTC. Set the OPENAI_API_KEY environment variable before starting the backend. Without it, all other features work normally.' },
+  { title: 'No Authentication', detail: 'PineBack is a single-user tool, not SaaS. There is no login, user management, or access control — the focus is on backtesting capabilities and compiler correctness.' },
 ]
 
 // AI Workflow
 const aiWorkflow = [
   { emoji: '\uD83E\uDDE0', title: 'Cursor IDE + Claude', description: 'AI-powered development using Cursor IDE with Claude as the coding assistant for rapid prototyping and iteration.' },
   { emoji: '\uD83D\uDCDA', title: 'Custom Skills', description: 'Domain-specific skill files for PineScript compilation, vectorbt backtesting, TimescaleDB schemas, and frontend patterns.' },
-  { emoji: '\uD83D\uDD04', title: 'Incremental Commits', description: '24+ atomic commits with clear messages. Each commit builds on the last — traceable development history.' },
+  { emoji: '\uD83D\uDD04', title: 'Incremental Commits', description: '110+ atomic commits with clear messages. Each commit builds on the last — traceable development history.' },
 ]
 
 const devPhases = [
