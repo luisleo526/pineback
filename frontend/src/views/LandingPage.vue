@@ -121,8 +121,8 @@
     <section class="relative z-10 py-24 bg-dark-900/40">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-16">
-          <h2 class="text-3xl sm:text-4xl font-bold mb-4">Key Features</h2>
-          <p class="text-dark-300 max-w-xl mx-auto">Everything you need to define, compile, and backtest quantitative trading strategies.</p>
+          <h2 class="text-3xl sm:text-4xl font-bold mb-4">What It Does</h2>
+          <p class="text-dark-300 max-w-xl mx-auto">From strategy creation to performance analysis — everything in one platform.</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           <div
@@ -144,11 +144,36 @@
       </div>
     </section>
 
-    <!-- Magnifier Mode — Intra-Bar Detection -->
+    <!-- Key Assumptions -->
     <section class="relative z-10 py-24">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-16">
-          <h2 class="text-3xl sm:text-4xl font-bold mb-4">Magnifier Mode</h2>
+          <h2 class="text-3xl sm:text-4xl font-bold mb-4">Design Decisions</h2>
+          <p class="text-dark-300 max-w-xl mx-auto">Key assumptions and scope boundaries that shaped this project.</p>
+        </div>
+        <div class="max-w-3xl mx-auto space-y-4">
+          <div
+            v-for="assumption in assumptions"
+            :key="assumption.title"
+            class="rounded-xl border border-white/[0.06] bg-dark-800/30 backdrop-blur-sm p-5 flex gap-4"
+          >
+            <div class="w-8 h-8 rounded-lg bg-dark-700/60 flex items-center justify-center text-accent-400 shrink-0 mt-0.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+            </div>
+            <div>
+              <h4 class="font-semibold text-sm mb-1">{{ assumption.title }}</h4>
+              <p class="text-xs text-dark-400 leading-relaxed">{{ assumption.detail }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Magnifier Mode — Intra-Bar Detection -->
+    <section class="relative z-10 py-24 bg-dark-900/40">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold mb-4">Deep Dive: Magnifier Mode</h2>
           <p class="text-dark-300 max-w-2xl mx-auto">
             Standard backtests fill at bar close — missing what happens <em>inside</em> each candle.
             Magnifier mode resamples higher-timeframe signals to 1-minute bars,
@@ -362,11 +387,11 @@
     </section>
 
     <!-- Metrics -->
-    <section class="relative z-10 py-24 bg-dark-900/40">
+    <section class="relative z-10 py-24">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-16">
-          <h2 class="text-3xl sm:text-4xl font-bold mb-4">Computed Metrics</h2>
-          <p class="text-dark-300 max-w-xl mx-auto">Every backtest produces a comprehensive set of risk-adjusted performance metrics.</p>
+          <h2 class="text-3xl sm:text-4xl font-bold mb-4">What You Get Back</h2>
+          <p class="text-dark-300 max-w-xl mx-auto">Every backtest produces 16 risk-adjusted performance metrics — from basic returns to trade-level statistics.</p>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           <div
@@ -382,12 +407,12 @@
       </div>
     </section>
 
-    <!-- Architecture -->
+    <!-- Architecture & Tech Stack -->
     <section class="relative z-10 py-24 bg-dark-900/40">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-16">
-          <h2 class="text-3xl sm:text-4xl font-bold mb-4">Architecture</h2>
-          <p class="text-dark-300 max-w-xl mx-auto">Full system overview — from strategy creation to backtest results.</p>
+          <h2 class="text-3xl sm:text-4xl font-bold mb-4">How It's Built</h2>
+          <p class="text-dark-300 max-w-xl mx-auto">System architecture and technology choices — from browser to database.</p>
         </div>
 
         <!-- Visual Architecture Diagram -->
@@ -642,36 +667,66 @@
             </div>
           </div>
         </div>
+
+        <!-- Tech Stack (merged into Architecture) -->
+        <div class="max-w-5xl mx-auto mt-12">
+          <h3 class="text-xl font-bold text-center mb-6">Tech Stack</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div
+              v-for="stack in techStack"
+              :key="stack.category"
+              class="rounded-xl border border-white/[0.06] bg-dark-800/30 backdrop-blur-sm p-6"
+            >
+              <div class="flex items-center gap-2 mb-5">
+                <div class="w-2 h-2 rounded-full" :class="stack.dot"></div>
+                <h3 class="font-semibold text-sm uppercase tracking-wider text-dark-200">{{ stack.category }}</h3>
+              </div>
+              <div class="space-y-3">
+                <div v-for="tech in stack.items" :key="tech.name" class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-md bg-dark-700/60 flex items-center justify-center text-xs font-bold text-dark-300 shrink-0">
+                    {{ tech.abbr }}
+                  </div>
+                  <div>
+                    <div class="text-sm font-medium">{{ tech.name }}</div>
+                    <div class="text-[11px] text-dark-400">{{ tech.role }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Tech Stack -->
+    <!-- AI Workflow -->
     <section class="relative z-10 py-24">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-16">
-          <h2 class="text-3xl sm:text-4xl font-bold mb-4">Tech Stack</h2>
-          <p class="text-dark-300 max-w-xl mx-auto">Built with modern, production-proven technologies.</p>
+          <h2 class="text-3xl sm:text-4xl font-bold mb-4">How It Was Built</h2>
+          <p class="text-dark-300 max-w-xl mx-auto">AI-assisted development process and timeline.</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
           <div
-            v-for="stack in techStack"
-            :key="stack.category"
-            class="rounded-xl border border-white/[0.06] bg-dark-800/30 backdrop-blur-sm p-6"
+            v-for="item in aiWorkflow"
+            :key="item.title"
+            class="rounded-xl border border-white/[0.06] bg-dark-800/30 backdrop-blur-sm p-6 text-center"
           >
-            <div class="flex items-center gap-2 mb-5">
-              <div class="w-2 h-2 rounded-full" :class="stack.dot"></div>
-              <h3 class="font-semibold text-sm uppercase tracking-wider text-dark-200">{{ stack.category }}</h3>
+            <div class="w-12 h-12 rounded-xl bg-accent-500/10 flex items-center justify-center mx-auto mb-4 text-2xl">
+              {{ item.emoji }}
             </div>
-            <div class="space-y-3">
-              <div v-for="tech in stack.items" :key="tech.name" class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-md bg-dark-700/60 flex items-center justify-center text-xs font-bold text-dark-300 shrink-0">
-                  {{ tech.abbr }}
-                </div>
-                <div>
-                  <div class="text-sm font-medium">{{ tech.name }}</div>
-                  <div class="text-[11px] text-dark-400">{{ tech.role }}</div>
-                </div>
+            <h4 class="font-semibold mb-2">{{ item.title }}</h4>
+            <p class="text-xs text-dark-400 leading-relaxed">{{ item.description }}</p>
+          </div>
+        </div>
+        <div class="mt-10 max-w-4xl mx-auto rounded-xl border border-white/[0.06] bg-dark-800/30 backdrop-blur-sm p-6">
+          <h4 class="font-semibold text-sm mb-4">Development Timeline</h4>
+          <div class="flex items-center gap-3 overflow-x-auto pb-2">
+            <div v-for="(phase, i) in devPhases" :key="i" class="flex items-center gap-3 shrink-0">
+              <div class="text-center">
+                <div class="text-xs font-mono text-accent-400">{{ phase.label }}</div>
+                <div class="text-[10px] text-dark-500 mt-0.5">{{ phase.detail }}</div>
               </div>
+              <svg v-if="i < devPhases.length - 1" class="w-4 h-4 text-dark-600 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
             </div>
           </div>
         </div>
@@ -682,8 +737,8 @@
     <section class="relative z-10 py-24 bg-dark-900/40">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-16">
-          <h2 class="text-3xl sm:text-4xl font-bold mb-4">How to Run</h2>
-          <p class="text-dark-300 max-w-xl mx-auto">Get up and running in minutes with local development or Docker deployment.</p>
+          <h2 class="text-3xl sm:text-4xl font-bold mb-4">Try It Yourself</h2>
+          <p class="text-dark-300 max-w-xl mx-auto">Clone, run, and verify — everything is reproducible in minutes.</p>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- Local Dev -->
@@ -741,103 +796,11 @@
       </div>
     </section>
 
-    <!-- Key Assumptions -->
-    <section class="relative z-10 py-24">
-      <div class="max-w-7xl mx-auto px-6">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl sm:text-4xl font-bold mb-4">Key Assumptions</h2>
-          <p class="text-dark-300 max-w-xl mx-auto">Design decisions and scope boundaries for this interview project.</p>
-        </div>
-        <div class="max-w-3xl mx-auto space-y-4">
-          <div
-            v-for="assumption in assumptions"
-            :key="assumption.title"
-            class="rounded-xl border border-white/[0.06] bg-dark-800/30 backdrop-blur-sm p-5 flex gap-4"
-          >
-            <div class="w-8 h-8 rounded-lg bg-dark-700/60 flex items-center justify-center text-accent-400 shrink-0 mt-0.5">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
-            </div>
-            <div>
-              <h4 class="font-semibold text-sm mb-1">{{ assumption.title }}</h4>
-              <p class="text-xs text-dark-400 leading-relaxed">{{ assumption.detail }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- AI Workflow -->
-    <section class="relative z-10 py-24 bg-dark-900/40">
-      <div class="max-w-7xl mx-auto px-6">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl sm:text-4xl font-bold mb-4">AI-Assisted Development</h2>
-          <p class="text-dark-300 max-w-xl mx-auto">How this project was built with modern AI tooling.</p>
-        </div>
-        <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div
-            v-for="item in aiWorkflow"
-            :key="item.title"
-            class="rounded-xl border border-white/[0.06] bg-dark-800/30 backdrop-blur-sm p-6 text-center"
-          >
-            <div class="w-12 h-12 rounded-xl bg-accent-500/10 flex items-center justify-center mx-auto mb-4 text-2xl">
-              {{ item.emoji }}
-            </div>
-            <h4 class="font-semibold mb-2">{{ item.title }}</h4>
-            <p class="text-xs text-dark-400 leading-relaxed">{{ item.description }}</p>
-          </div>
-        </div>
-        <div class="mt-10 max-w-4xl mx-auto rounded-xl border border-white/[0.06] bg-dark-800/30 backdrop-blur-sm p-6">
-          <h4 class="font-semibold text-sm mb-4">Development Timeline</h4>
-          <div class="flex items-center gap-3 overflow-x-auto pb-2">
-            <div v-for="(phase, i) in devPhases" :key="i" class="flex items-center gap-3 shrink-0">
-              <div class="text-center">
-                <div class="text-xs font-mono text-accent-400">{{ phase.label }}</div>
-                <div class="text-[10px] text-dark-500 mt-0.5">{{ phase.detail }}</div>
-              </div>
-              <svg v-if="i < devPhases.length - 1" class="w-4 h-4 text-dark-600 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Bonus Features -->
-    <section class="relative z-10 py-24">
-      <div class="max-w-7xl mx-auto px-6">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl sm:text-4xl font-bold mb-4">Bonus Features</h2>
-          <p class="text-dark-300 max-w-xl mx-auto">Above and beyond the core requirements.</p>
-        </div>
-        <div class="max-w-5xl mx-auto rounded-xl border border-white/[0.06] bg-dark-800/30 backdrop-blur-sm overflow-hidden">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="border-b border-white/[0.06] bg-dark-800/60">
-                <th class="text-left px-6 py-3.5 font-semibold text-dark-200 text-xs uppercase tracking-wider">Feature</th>
-                <th class="text-left px-6 py-3.5 font-semibold text-dark-200 text-xs uppercase tracking-wider">Description</th>
-                <th class="text-left px-6 py-3.5 font-semibold text-dark-200 text-xs uppercase tracking-wider hidden md:table-cell">Use Case</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(bonus, i) in bonusFeatures"
-                :key="bonus.name"
-                class="border-b border-white/[0.04] last:border-0 hover:bg-dark-700/20 transition-colors"
-              >
-                <td class="px-6 py-4 font-medium text-accent-400 whitespace-nowrap">{{ bonus.name }}</td>
-                <td class="px-6 py-4 text-dark-300">{{ bonus.description }}</td>
-                <td class="px-6 py-4 text-dark-400 text-xs hidden md:table-cell">{{ bonus.useCase }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
     <!-- Footer CTA -->
-    <section class="relative z-10 py-24 bg-dark-900/40">
+    <section class="relative z-10 py-24">
       <div class="max-w-7xl mx-auto px-6 text-center">
-        <h2 class="text-3xl sm:text-4xl font-bold mb-4">Ready to Explore?</h2>
-        <p class="text-dark-300 mb-10 max-w-lg mx-auto">Launch the app to build a strategy, run a backtest, and view the results — all in your browser.</p>
+        <h2 class="text-3xl sm:text-4xl font-bold mb-4">See It in Action</h2>
+        <p class="text-dark-300 mb-10 max-w-lg mx-auto">Build a strategy, run a backtest, and explore the results — all in your browser, no setup required.</p>
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
           <router-link
             to="/app"
@@ -862,7 +825,7 @@
     <!-- Footer -->
     <footer class="relative z-10 border-t border-white/[0.06] py-8">
       <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="text-xs text-dark-500">PineBack &middot; Built as an interview project &middot; 2025</div>
+        <div class="text-xs text-dark-500">PineBack &middot; Built as an interview project &middot; 2025-2026</div>
         <div class="flex items-center gap-4 text-xs text-dark-500">
           <a :href="githubUrl" target="_blank" class="hover:text-dark-300 transition-colors">GitHub</a>
           <span>&middot;</span>
@@ -967,7 +930,7 @@ const metrics = [
   { name: 'Avg Loss Duration', sample: '1d 12h', formula: 'Mean holding period (losses)', color: 'text-white/70' },
 ]
 
-// Architecture layers
+// Architecture layers (unused — kept for reference, will be cleaned up)
 const archLayers = [
   { name: 'Browser', tech: 'Vue 3 + Vite', emoji: '\uD83C\uDF10', bg: 'bg-blue-500/15', desc: 'SPA with strategy builder, code editor, TradingView-style charting, and real-time polling.' },
   { name: 'Reverse Proxy', tech: 'nginx', emoji: '\uD83D\uDEE1\uFE0F', bg: 'bg-amber-500/15', desc: 'TLS termination (Let\'s Encrypt), static file serving, API proxying to upstream.' },
@@ -1051,7 +1014,7 @@ const devPhases = [
   { label: 'Phase 6', detail: 'Deploy + Polish' },
 ]
 
-// Bonus Features
+// Bonus Features (unused — kept for reference, will be cleaned up)
 const bonusFeatures = [
   { name: 'Visual Strategy Builder', description: 'Drag-and-drop interface for building strategies without code', useCase: 'Non-technical users can create and test strategies' },
   { name: 'PineScript v6 Compiler', description: 'Full 4-stage compiler pipeline: tokenize → parse → AST → codegen', useCase: 'Import existing TradingView strategies' },
