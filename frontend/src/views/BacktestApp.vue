@@ -120,10 +120,11 @@
       <transition name="slide-panel">
         <div
           v-if="showBacktestPanel"
+          id="backtest-panel"
           class="w-[380px] flex-shrink-0 border-l border-white/[0.04] flex flex-col overflow-hidden"
           style="background: rgba(14, 17, 32, 0.98);"
         >
-          <div class="flex-1 overflow-y-auto">
+          <div id="backtest-panel-scroll" class="flex-1 overflow-y-auto">
             <BacktestConfigPanel
               :generated-code="generatedCode"
               @run-backtest="handleRunBacktest"

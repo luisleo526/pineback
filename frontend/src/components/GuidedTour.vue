@@ -145,6 +145,46 @@ function _multiSpotlight(selectors) {
 
 
 // ─────────────────────────────────────────────────────────────
+// Helpers: wait for elements & panel transitions
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Wait until a DOM element matching the selector exists and is visible,
+ * polling every `interval` ms up to `timeout` ms.
+ */
+function _waitForElement(selector, timeout = 3000, interval = 100) {
+  return new Promise((resolve) => {
+    const start = Date.now()
+    const check = () => {
+      const el = document.querySelector(selector)
+      if (el && el.offsetWidth > 0 && el.offsetHeight > 0) {
+        resolve(el)
+        return
+      }
+      if (Date.now() - start > timeout) {
+        resolve(null)
+        return
+      }
+      setTimeout(check, interval)
+    }
+    check()
+  })
+}
+
+/**
+ * Scroll an element into view within its nearest scrollable ancestor,
+ * then wait for the scroll to settle.
+ */
+function _scrollIntoViewAndWait(el, delay = 400) {
+  return new Promise((resolve) => {
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+    setTimeout(resolve, delay)
+  })
+}
+
+// ─────────────────────────────────────────────────────────────
 // Tour definition
 // ─────────────────────────────────────────────────────────────
 
@@ -299,9 +339,17 @@ function createTour() {
     buttons: [],
   })
 
-  // Step 9: Select timeframe (action or skip)
-  // Timeframe select is near the top of the right slide panel →
-  // tooltip LEFT (into the main content area where there's space).
+  // ── Steps 9-11 live inside the backtest config panel.
+  // The panel opens via a Vue transition after step 8's click,
+  // so each step must wait for its target element to appear in
+  // the DOM and become visible before Shepherd attaches.
+  //
+  // The panel has overflow-hidden/overflow-y-auto which clips
+  // z-index. To avoid the spotlight being clipped, we disable
+  // scrollTo in defaultStepOptions and manually scroll within
+  // the panel's own scroll container.
+
+  // Step 9: Select timeframe
   tour.addStep({
     id: 'select-timeframe',
     title: 'Select Timeframe',
@@ -311,21 +359,17 @@ function createTour() {
     `,
     attachTo: { element: '#timeframe-select', on: 'left' },
     advanceOn: { selector: '#timeframe-select', event: 'change' },
+    scrollTo: false,
     buttons: [
       { text: 'Next →', action: tour.next, classes: 'shepherd-button-primary' },
     ],
-    beforeShowPromise() {
-      return new Promise((resolve) => {
-        const el = document.getElementById('timeframe-select')
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        setTimeout(resolve, 350)
-      })
+    async beforeShowPromise() {
+      const el = await _waitForElement('#timeframe-select')
+      if (el) await _scrollIntoViewAndWait(el)
     },
   })
 
-  // Step 10: Set date range (action)
-  // Date inputs are in the right panel → tooltip LEFT.
-  // Extra spotlight on the magnifier toggle since we mention it.
+  // Step 10: Set date range
   tour.addStep({
     id: 'set-dates',
     title: 'Set Date Range',
@@ -335,23 +379,19 @@ function createTour() {
       <p class="text-xs opacity-40 mt-2">Step 10 of 12 · Fill both dates, then click Next</p>
     `,
     attachTo: { element: '#date-range-inputs', on: 'left' },
+    scrollTo: false,
     buttons: [
       { text: '← Back', action: tour.back, classes: 'shepherd-button-secondary' },
       { text: 'Next →', action: tour.next, classes: 'shepherd-button-primary' },
     ],
     when: _multiSpotlight(['#magnifier-toggle']),
-    beforeShowPromise() {
-      return new Promise((resolve) => {
-        const el = document.getElementById('date-range-inputs')
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        setTimeout(resolve, 350)
-      })
+    async beforeShowPromise() {
+      const el = await _waitForElement('#date-range-inputs')
+      if (el) await _scrollIntoViewAndWait(el)
     },
   })
 
-  // Step 11: Run Backtest (action)
-  // Button is inside a scrollable right panel → scroll it into view
-  // first, then attach tooltip on LEFT so it doesn't cover the button.
+  // Step 11: Run Backtest
   tour.addStep({
     id: 'run-backtest',
     title: 'Run Your Backtest!',
@@ -362,17 +402,11 @@ function createTour() {
     `,
     attachTo: { element: '#run-backtest-btn', on: 'left' },
     advanceOn: { selector: '#run-backtest-btn', event: 'click' },
+    scrollTo: false,
     buttons: [],
-    beforeShowPromise() {
-      return new Promise((resolve) => {
-        const btn = document.getElementById('run-backtest-btn')
-        if (btn) {
-          btn.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          setTimeout(resolve, 350)
-        } else {
-          resolve()
-        }
-      })
+    async beforeShowPromise() {
+      const el = await _waitForElement('#run-backtest-btn')
+      if (el) await _scrollIntoViewAndWait(el)
     },
   })
 
@@ -584,6 +618,15 @@ defineExpose({ startTour, advanceIfActive })
 .shepherd-modal-overlay-container path {
   fill: rgba(0, 0, 0, 0.85) !important;
   fill-rule: evenodd !important;
+}
+
+/* ── Overflow fix: let spotlights render outside the backtest panel ─ */
+/* During the tour, remove overflow clipping from the backtest config
+   panel so the Shepherd spotlight glow isn't cut off. Scoped to
+   #backtest-panel and its scroll container only. */
+.shepherd-has-active-tour #backtest-panel,
+.shepherd-has-active-tour #backtest-panel-scroll {
+  overflow: visible !important;
 }
 
 /* ── Target highlight — bright animated glow ──────────── */
