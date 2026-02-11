@@ -930,27 +930,6 @@ const metrics = [
   { name: 'Avg Loss Duration', sample: '1d 12h', formula: 'Mean holding period (losses)', color: 'text-white/70' },
 ]
 
-// Architecture layers (unused — kept for reference, will be cleaned up)
-const archLayers = [
-  { name: 'Browser', tech: 'Vue 3 + Vite', emoji: '\uD83C\uDF10', bg: 'bg-blue-500/15', desc: 'SPA with strategy builder, code editor, TradingView-style charting, and real-time polling.' },
-  { name: 'Reverse Proxy', tech: 'nginx', emoji: '\uD83D\uDEE1\uFE0F', bg: 'bg-amber-500/15', desc: 'TLS termination (Let\'s Encrypt), static file serving, API proxying to upstream.' },
-  { name: 'API Server', tech: 'FastAPI', emoji: '\u26A1', bg: 'bg-green-500/15', desc: 'Async REST endpoints for submitting strategies, tracking jobs, and returning results.' },
-  { name: 'Task Runner', tech: 'BackgroundTasks', emoji: '\u2699\uFE0F', bg: 'bg-purple-500/15', desc: 'PineScript compiler parses strategy into signals; vectorbt executes backtest with market data.' },
-  { name: 'Database', tech: 'TimescaleDB', emoji: '\uD83D\uDDC4\uFE0F', bg: 'bg-orange-500/15', desc: 'Hypertable for OHLCV candles with compression. PgBouncer for connection pooling.' },
-]
-
-const pipelineSteps = [
-  'POST /api/backtests',
-  'Validate & Save',
-  'Background Task',
-  'Compile PineScript',
-  'Load OHLCV Data',
-  'vectorbt Backtest',
-  'Compute Metrics',
-  'Store Results',
-  'Poll → Render',
-]
-
 // Tech stack
 const techStack = [
   {
@@ -1014,16 +993,4 @@ const devPhases = [
   { label: 'Phase 6', detail: 'Deploy + Polish' },
 ]
 
-// Bonus Features (unused — kept for reference, will be cleaned up)
-const bonusFeatures = [
-  { name: 'Visual Strategy Builder', description: 'Drag-and-drop interface for building strategies without code', useCase: 'Non-technical users can create and test strategies' },
-  { name: 'PineScript v6 Compiler', description: 'Full 4-stage compiler pipeline: tokenize → parse → AST → codegen', useCase: 'Import existing TradingView strategies' },
-  { name: 'Magnifier Mode', description: 'Resample HT signals to 1-min bars for intra-bar execution', useCase: 'Realistic fill simulation for limit/stop orders' },
-  { name: 'OHLCV Candlestick Chart', description: 'Interactive TradingView-style chart with buy/sell markers', useCase: 'Visual trade inspection with market context' },
-  { name: '12 Strategy Templates', description: 'Pre-built strategies covering major TA categories', useCase: 'Instant backtesting without strategy creation' },
-  { name: 'Drawdown Analysis', description: 'Underwater chart + top-N drawdown table with duration', useCase: 'Risk assessment and worst-case scenario analysis' },
-  { name: 'Job Progress Tracking', description: 'Real-time status polling with progress percentage', useCase: 'Monitor multi-minute backtests without page refresh' },
-  { name: 'IaC Deployment', description: 'Terraform + Docker Compose for reproducible infrastructure', useCase: 'One-command deployment to AWS' },
-  { name: 'Voice AI Agent', description: 'Voice conversation with AI via OpenAI Realtime WebRTC. Function calls resolved in-browser from loaded report data — no backend in the hot path.', useCase: 'Hands-free strategy analysis and performance Q&A' },
-]
 </script>
