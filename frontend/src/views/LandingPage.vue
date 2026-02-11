@@ -19,6 +19,25 @@
           <span class="text-sm font-semibold tracking-wide">PINEBACK</span>
         </div>
         <div class="flex items-center gap-6">
+          <!-- UI Scale control -->
+          <div class="flex items-center rounded-lg overflow-hidden border border-white/[0.06]">
+            <button
+              @click="scaleDown"
+              class="px-2 py-1.5 text-[10px] font-bold leading-none text-dark-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+              title="Zoom out"
+            >A-</button>
+            <button
+              @dblclick="resetScale"
+              class="px-1.5 py-1.5 text-[10px] text-white/40 leading-none cursor-default min-w-[36px] text-center"
+              title="Double-click to reset"
+            >{{ Math.round(scale * 100) }}%</button>
+            <button
+              @click="scaleUp"
+              class="px-2 py-1.5 text-[10px] font-bold leading-none text-dark-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+              title="Zoom in"
+            >A+</button>
+          </div>
+
           <a :href="githubUrl" target="_blank" class="text-dark-300 hover:text-white transition-colors text-sm">GitHub</a>
           <router-link to="/app" class="px-4 py-1.5 text-sm font-medium rounded-md bg-accent-500 hover:bg-accent-600 transition-colors">
             Launch App
@@ -856,7 +875,9 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useUIScale } from '../composables/useUIScale.js'
 
+const { scale, scaleUp, scaleDown, resetScale } = useUIScale()
 const githubUrl = 'https://github.com/luisleo526/pineback'
 
 // Hero stat previews

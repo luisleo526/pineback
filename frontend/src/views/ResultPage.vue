@@ -17,6 +17,25 @@
         </span>
       </div>
       <div class="flex items-center gap-2">
+        <!-- UI Scale control -->
+        <div class="flex items-center rounded-lg overflow-hidden border border-white/[0.06]">
+          <button
+            @click="scaleDown"
+            class="glass-btn px-2 py-1.5 text-[10px] font-bold leading-none"
+            title="Zoom out"
+          >A-</button>
+          <button
+            @dblclick="resetScale"
+            class="px-1.5 py-1.5 text-[10px] text-white/40 leading-none cursor-default min-w-[36px] text-center"
+            title="Double-click to reset"
+          >{{ Math.round(scale * 100) }}%</button>
+          <button
+            @click="scaleUp"
+            class="glass-btn px-2 py-1.5 text-[10px] font-bold leading-none"
+            title="Zoom in"
+          >A+</button>
+        </div>
+
         <span v-if="loading" class="text-xs text-white/30">
           <i class="fas fa-spinner fa-spin mr-1"></i> Loading...
         </span>
@@ -112,6 +131,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getBacktest } from '../api/index.js'
+import { useUIScale } from '../composables/useUIScale.js'
 import StatsCards from '../components/backtest/StatsCards.vue'
 import EquityChart from '../components/backtest/EquityChart.vue'
 import DrawdownChart from '../components/backtest/DrawdownChart.vue'
@@ -120,6 +140,7 @@ import TradeTable from '../components/backtest/TradeTable.vue'
 import VoiceChat from '../components/VoiceChat.vue'
 
 const route = useRoute()
+const { scale, scaleUp, scaleDown, resetScale } = useUIScale()
 const result = ref(null)
 const loading = ref(true)
 const error = ref(null)

@@ -67,6 +67,25 @@
 
       <!-- Right: actions -->
       <div class="flex items-center gap-2">
+        <!-- UI Scale control -->
+        <div class="flex items-center rounded-lg overflow-hidden border border-white/[0.06]">
+          <button
+            @click="scaleDown"
+            class="glass-btn px-2 py-1.5 text-[10px] font-bold leading-none"
+            title="Zoom out"
+          >A-</button>
+          <button
+            @dblclick="resetScale"
+            class="px-1.5 py-1.5 text-[10px] text-white/40 leading-none cursor-default min-w-[36px] text-center"
+            title="Double-click to reset"
+          >{{ Math.round(scale * 100) }}%</button>
+          <button
+            @click="scaleUp"
+            class="glass-btn px-2 py-1.5 text-[10px] font-bold leading-none"
+            title="Zoom in"
+          >A+</button>
+        </div>
+
         <button
           @click="showTutorial"
           class="glass-btn flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg"
@@ -133,8 +152,10 @@ import BacktestConfigPanel from '../components/backtest/BacktestConfigPanel.vue'
 import BacktestJobTracker from '../components/backtest/BacktestJobTracker.vue'
 import GuidedTour from '../components/GuidedTour.vue'
 import { getStrategies } from '../api/index.js'
+import { useUIScale } from '../composables/useUIScale.js'
 
 const router = useRouter()
+const { scale, scaleUp, scaleDown, resetScale } = useUIScale()
 
 // ── Refs ──────────────────────────────────────────────────────
 const builderRef = ref(null)
