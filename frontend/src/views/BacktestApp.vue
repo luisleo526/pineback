@@ -7,6 +7,14 @@
     >
       <!-- Left: branding + template -->
       <div class="flex items-center gap-3">
+        <button
+          @click="router.push('/')"
+          class="glass-btn flex items-center gap-1.5 px-2 py-1.5 text-xs rounded-lg"
+          title="Back to Home"
+        >
+          <i class="fas fa-home text-[11px]"></i>
+        </button>
+
         <h1 class="text-sm font-semibold text-white/80">
           <i class="fas fa-chart-line mr-1.5 text-accent-500"></i>
           PineBack
@@ -119,11 +127,14 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import StrategyBuilderPage from '../components/strategy-builder/StrategyBuilderPage.vue'
 import BacktestConfigPanel from '../components/backtest/BacktestConfigPanel.vue'
 import BacktestJobTracker from '../components/backtest/BacktestJobTracker.vue'
 import GuidedTour from '../components/GuidedTour.vue'
 import { getStrategies } from '../api/index.js'
+
+const router = useRouter()
 
 // ── Refs ──────────────────────────────────────────────────────
 const builderRef = ref(null)
