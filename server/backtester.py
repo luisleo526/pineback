@@ -199,7 +199,12 @@ class Backtester:
 
     def _run_magnified(self, df_1m, df_tf, timeframe, strategy, params,
                        capital, fees, slippage, size, size_type, progress):
-        """Magnifier with dynamic resolution and progress reporting."""
+        """Magnifier with dynamic resolution and progress reporting.
+
+        Optimized: pre-allocates a window buffer DataFrame and updates the
+        last row in-place instead of creating+concatenating DataFrames per
+        sub-bar.  This eliminates ~15 allocations per HT bar.
+        """
         mag_tf = compute_magnifier_resolution(timeframe)
         df_mag = resample_ohlcv(df_1m, mag_tf) if mag_tf != "1m" else df_1m
 
@@ -227,6 +232,14 @@ class Backtester:
         total_bars = len(tf_index) - warmup
         report_interval = max(1, total_bars // 50)
 
+        # Pre-extract numpy arrays from the HT DataFrame for fast slicing
+        tf_open = df_tf["open"].values
+        tf_high = df_tf["high"].values
+        tf_low = df_tf["low"].values
+        tf_close = df_tf["close"].values
+        tf_volume = df_tf["volume"].values
+        tf_cols = ["open", "high", "low", "close", "volume"]
+
         for bar_idx in range(warmup, len(tf_index)):
             # Report progress every ~2% of bars
             bars_done = bar_idx - warmup
@@ -243,13 +256,28 @@ class Backtester:
             if pos_start >= pos_end:
                 continue
 
+            # Build the window buffer once per HT bar: completed rows + 1 forming row.
+            # Use numpy to construct the data block, then wrap in a DataFrame once.
             win_start = max(0, bar_idx - window_size)
-            completed_window = df_tf.iloc[win_start:bar_idx].copy()
+            n_completed = bar_idx - win_start
 
+            # Stack completed window data from pre-extracted arrays
+            buf = np.empty((n_completed + 1, 5), dtype=np.float64)
+            buf[:n_completed, 0] = tf_open[win_start:bar_idx]
+            buf[:n_completed, 1] = tf_high[win_start:bar_idx]
+            buf[:n_completed, 2] = tf_low[win_start:bar_idx]
+            buf[:n_completed, 3] = tf_close[win_start:bar_idx]
+            buf[:n_completed, 4] = tf_volume[win_start:bar_idx]
+
+            # Pre-fill the forming row placeholder (will be updated in inner loop)
             forming_open = float(mag_open[pos_start])
             forming_high = -np.inf
             forming_low = np.inf
             forming_vol = 0.0
+
+            # Build index once; we'll update the last entry in-place
+            win_idx = list(tf_index[win_start:bar_idx]) + [mag_index[pos_start]]
+            window = pd.DataFrame(buf, index=win_idx, columns=tf_cols)
 
             for pos in range(pos_start, pos_end):
                 forming_high = max(forming_high, float(mag_high[pos]))
@@ -257,17 +285,13 @@ class Backtester:
                 forming_close = float(mag_close[pos])
                 forming_vol += float(mag_volume[pos])
 
-                forming_row = pd.DataFrame(
-                    {
-                        "open": [forming_open],
-                        "high": [forming_high],
-                        "low": [forming_low],
-                        "close": [forming_close],
-                        "volume": [forming_vol],
-                    },
-                    index=[mag_index[pos]],
-                )
-                window = pd.concat([completed_window, forming_row])
+                # Update the last row in-place (no allocation)
+                window.iloc[-1, 0] = forming_open
+                window.iloc[-1, 1] = forming_high
+                window.iloc[-1, 2] = forming_low
+                window.iloc[-1, 3] = forming_close
+                window.iloc[-1, 4] = forming_vol
+                window.index = win_idx[:-1] + [mag_index[pos]]
 
                 try:
                     le, lx, se, sx = strategy.compute(window, params)
