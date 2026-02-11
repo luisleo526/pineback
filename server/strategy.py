@@ -187,7 +187,7 @@ class BacktestResult:
     avg_losing_trade_pct: float
     avg_winning_duration: str
     avg_losing_duration: str
-    profit_factor: float
+    profit_factor: Optional[float]  # None when gross loss is zero (= ∞)
     expectancy: float
 
     # ── Time series (for charting) ───────────────────────────

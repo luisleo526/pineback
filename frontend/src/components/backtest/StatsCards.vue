@@ -77,10 +77,12 @@ const stats = computed(() => {
     },
     {
       label: 'Profit Factor',
-      value: formatRatio(r.profit_factor),
+      value: r.profit_factor != null
+        ? formatRatio(r.profit_factor)
+        : (r.total_trades > 0 && r.win_rate_pct === 100 ? '∞' : '—'),
       colorClass: r.profit_factor != null
         ? (r.profit_factor > 1 ? 'text-green-400' : 'text-red-400')
-        : 'text-white/50',
+        : (r.total_trades > 0 && r.win_rate_pct === 100 ? 'text-green-400' : 'text-white/50'),
     },
     {
       label: 'Expectancy',

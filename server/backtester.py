@@ -525,7 +525,7 @@ class Backtester:
             avg_losing_trade_pct=_safe_float(stats.get("Avg Losing Trade [%]")) or 0.0,
             avg_winning_duration=str(stats.get("Avg Winning Trade Duration", "")),
             avg_losing_duration=str(stats.get("Avg Losing Trade Duration", "")),
-            profit_factor=_safe_float(stats.get("Profit Factor")) or 0.0,
+            profit_factor=_safe_float(stats.get("Profit Factor")),
             expectancy=_safe_float(stats.get("Expectancy")) or 0.0,
             # Time series
             equity_curve=equity_curve,
