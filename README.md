@@ -18,33 +18,32 @@ TradingView has the **largest global community** of retail algo-traders, all wri
 
 ## Metrics
 
-Every backtest produces a comprehensive set of performance metrics:
+Every backtest produces 16 performance metrics (4×4 grid):
 
-- **Net Profit** — final value minus initial capital
-- **CAGR / Annualized Return** — compound annual growth rate
-- **Annualized Volatility** — standard deviation of returns, annualized
-- **Max Drawdown** — largest peak-to-trough decline (% and duration)
-- **Sharpe Ratio** — risk-adjusted return (excess return / volatility)
-- **Sortino Ratio** — downside-risk-adjusted return
-- **Profit Factor** — gross profit / gross loss
-- **Expectancy** — average profit per trade
-- **Total Trades, Win Rate, Best/Worst Trade, Avg Win/Loss, Avg Duration**
+| Row | Metrics |
+|-----|---------|
+| 1 | Net Profit, CAGR, Annualized Volatility, Max Drawdown |
+| 2 | Sharpe Ratio, Sortino Ratio, Profit Factor, Expectancy |
+| 3 | Total Trades, Win Rate, Best Trade, Worst Trade |
+| 4 | Avg Winning Trade, Avg Losing Trade, Avg Win Duration, Avg Loss Duration |
 
 ## Architecture
 
 ```
 Browser (Vue 3 SPA)
   ├─ /           Landing page (project documentation)
-  └─ /app        Strategy Builder + Backtest Dashboard
-  └─ /result/:id Full-page backtest results
-        │
-        │ POST /api/backtests ── compile PineScript ── BackgroundTask
-        │ GET  /api/backtests/{id} ── poll progress (0-100%) / get result
-        │
+  ├─ /app        Strategy Builder + Backtest Dashboard
+  ├─ /result/:id Full-page backtest results + Voice AI Agent
+  │
+  │ POST /api/backtests ── compile PineScript ── BackgroundTask
+  │ GET  /api/backtests/{id} ── poll progress (0-100%) / get result
+  │ POST /api/voice/session ── SDP proxy for OpenAI Realtime WebRTC
+  │
 FastAPI (uvicorn)
   ├── PineScript v6 Compiler (tokenizer → parser → AST → codegen)
   ├── 37 Technical Indicators (ta.py)
   ├── vectorbt Portfolio.from_signals() (standard + magnifier mode)
+  ├── Voice session endpoint (proxies SDP to OpenAI, keeps API key server-side)
   └── TimescaleDB via PgBouncer
         ├── ohlcv (hypertable, ~1.4M 1-minute SPY bars, 2008-2021)
         └── backtests (job tracking + result storage)
@@ -62,8 +61,9 @@ FastAPI (uvicorn)
 | Real-time progress | Background jobs with DB-persisted progress (0-100%), 2s frontend polling |
 | 12 strategy templates | Pre-built classic strategies (MACD, RSI, BB, SuperTrend, etc.) with long+short signals |
 | Configurable parameters | Order size, commission, slippage, timeframe, date range, magnifier toggle |
-| Infrastructure as code | Fully parameterized Terraform for AWS EC2 + Route 53 |
+| Voice AI Agent | Discuss backtest results with an AI analyst via voice (OpenAI Realtime API over WebRTC). Function calls resolved in-browser from local report data — backend is not in the hot path. |
 | Interactive guided tutorial | Step-by-step walkthrough for first-time users (shepherd.js) |
+| Infrastructure as code | Fully parameterized Terraform for AWS EC2 + Route 53 |
 
 ## Quick Start (Local Development)
 
@@ -72,6 +72,10 @@ FastAPI (uvicorn)
 - Docker & Docker Compose
 - Python 3.11+
 - Node.js 18+
+- **`OPENAI_API_KEY`** (optional) — required only for the Voice AI Agent feature. Set it as an environment variable before starting the backend:
+  ```bash
+  export OPENAI_API_KEY="sk-..."
+  ```
 
 ### 1. Start the database
 
@@ -100,7 +104,11 @@ Loads ~1.4M 1-minute bars (SPY, 2008-2021) into TimescaleDB. Takes about 20 seco
 ### 4. Start the backend
 
 ```bash
+# Without Voice AI:
 uvicorn server.main:app --reload --port 8000
+
+# With Voice AI:
+OPENAI_API_KEY="sk-..." uvicorn server.main:app --reload --port 8000
 ```
 
 ### 5. Start the frontend
@@ -120,6 +128,7 @@ Open **http://localhost:5173** — landing page at `/`, app at `/app`.
 3. Watch the progress bar, then click **View** to see results
 4. Check: Overview (16 metrics), Chart (OHLCV with trade markers), Trades (entry/exit table)
 5. Copy the generated PineScript and paste it into TradingView — it will run there too
+6. Click the microphone icon on the result page to talk to the AI analyst about your results (requires `OPENAI_API_KEY`)
 
 ## Docker Deployment
 
@@ -129,6 +138,8 @@ docker compose -f docker-compose.prod.yml up -d --build
 docker compose -f docker-compose.prod.yml exec app python -m server.ingest
 # Open http://localhost
 ```
+
+To enable Voice AI in Docker, set `OPENAI_API_KEY` in the environment or `.env` file.
 
 ## Cloud Deployment (AWS via Terraform)
 
@@ -170,6 +181,7 @@ terraform init && terraform apply
 - **Strategies are stateless** — no persistent bar-to-bar variables (`var`/`varip`)
 - **Configurable execution costs** — commission (default 0.1%), slippage (default 0.05%), order size (default 100% equity)
 - **Magnifier mode** gives realistic intra-bar fills; standard mode fills at bar close
+- **Voice AI requires `OPENAI_API_KEY`** — the Voice AI Agent on the result page uses OpenAI's Realtime API (gpt-4o-mini-realtime-preview). Without the key, all other features work normally.
 - **No authentication** — single-user tool, not SaaS
 
 ## AI / Agent Workflow
@@ -191,5 +203,21 @@ terraform init && terraform apply
 |-------|-------------|
 | **Backend** | Python 3.11, FastAPI, SQLAlchemy, psycopg2, vectorbt, TimescaleDB, PgBouncer |
 | **Frontend** | Vue 3, Vite, Tailwind CSS, lightweight-charts (Series Primitives), shepherd.js |
-| **Infrastructure** | Docker, Terraform, AWS EC2, Route 53, nginx, Let's Encrypt |
+| **Voice AI** | OpenAI Realtime API (gpt-4o-mini-realtime-preview), WebRTC, in-browser function calling |
+| **Infrastructure** | Docker, Terraform, AWS EC2, Route 53, nginx, Let's Encrypt, Secrets Manager |
 | **Data** | [SPY 1-minute OHLCV from Kaggle](https://www.kaggle.com/datasets/rockinbrock/spy-1-minute-data), 2008-2021 (~1.4M candles, ~120MB CSV via Git LFS) |
+
+## Bonus Features
+
+| Feature | Description | Use Case |
+|---------|-------------|----------|
+| Visual Strategy Builder | Drag-and-drop interface with 40+ indicators | Non-technical users can create strategies |
+| PineScript v6 Compiler | Full 4-stage compiler: tokenize → parse → AST → codegen | Import/export TradingView strategies |
+| Magnifier Mode | Resample HT signals to 1-min bars for intra-bar execution | Realistic fill simulation for limit/stop orders |
+| OHLCV Candlestick Chart | Interactive chart with horizontal arrow markers at exact fill prices | Visual trade inspection with market context |
+| 12 Strategy Templates | Pre-built strategies covering major TA categories | Instant backtesting without building from scratch |
+| Drawdown Analysis | Underwater chart with duration tracking | Risk assessment and worst-case analysis |
+| Job Progress Tracking | Real-time status polling (0-100%) | Monitor long-running backtests |
+| Voice AI Agent | Voice conversation via OpenAI Realtime WebRTC; function calls resolved in-browser | Hands-free strategy analysis and performance Q&A |
+| IaC Deployment | Terraform + Docker Compose, fully parameterized | One-command deployment to any AWS account |
+| Interactive Tutorial | Guided tour with forced-action steps (shepherd.js) | Reviewer can experience the full workflow in 3 minutes |

@@ -690,7 +690,10 @@
 <span class="text-accent-400">uvicorn</span> server.main:app --reload --port 8000
 
 <span class="text-dark-500"># Frontend (new terminal)</span>
-<span class="text-accent-400">cd</span> frontend && npm install && npm run dev</pre>
+<span class="text-accent-400">cd</span> frontend && npm install && npm run dev
+
+<span class="text-dark-500"># Voice AI (optional — set before starting backend)</span>
+<span class="text-accent-400">export</span> OPENAI_API_KEY="sk-..."</pre>
           </div>
 
           <!-- Docker / Cloud -->
@@ -1008,6 +1011,7 @@ const assumptions = [
   { title: 'Stateless Strategies', detail: 'Strategies are pure functions of price data — no portfolio state carryover between bars. This matches the PineScript execution model and simplifies the compiler.' },
   { title: 'Configurable Commission & Slippage', detail: 'Default: 0.1% commission, 0.05% slippage per trade. Both are configurable in the backtest config panel to model different broker scenarios.' },
   { title: 'Magnifier vs Standard Mode', detail: 'Standard mode fills at bar close. Magnifier mode resamples higher-TF signals to 1-min candles for realistic intra-bar execution — critical for accurate limit/stop orders.' },
+  { title: 'Voice AI requires OPENAI_API_KEY', detail: 'The Voice AI Agent on the result page uses OpenAI\'s Realtime API (gpt-4o-mini-realtime-preview) over WebRTC. Set the OPENAI_API_KEY environment variable before starting the backend. Without it, all other features work normally.' },
 ]
 
 // AI Workflow
