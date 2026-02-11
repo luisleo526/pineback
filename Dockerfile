@@ -28,4 +28,7 @@ COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
 EXPOSE 8000
 
-CMD ["uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# Copy built frontend into shared volume on startup, then start the server.
+# The shared volume (/srv/frontend-dist) is mounted by docker-compose so
+# nginx can serve static assets directly instead of proxying through Python.
+CMD ["sh", "-c", "cp -a /app/frontend/dist/* /srv/frontend-dist/ 2>/dev/null; exec uvicorn server.main:app --host 0.0.0.0 --port 8000 --workers 2"]

@@ -124,7 +124,7 @@ server {
 
 # HTTPS server
 server {
-    listen 443 ssl;
+    listen 443 ssl http2;
     server_name DOMAIN_PLACEHOLDER;
 
     ssl_certificate     /etc/letsencrypt/live/DOMAIN_PLACEHOLDER/fullchain.pem;
@@ -132,26 +132,53 @@ server {
     ssl_protocols       TLSv1.2 TLSv1.3;
     ssl_ciphers         HIGH:!aNULL:!MD5;
 
-    location / {
+    # ── Static assets (hashed filenames → cache forever) ──────────
+    location /assets/ {
+        alias /usr/share/nginx/html/assets/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+
+    # ── SPA index.html (short cache so deploys propagate fast) ────
+    location = / {
+        root /usr/share/nginx/html;
+        try_files /index.html =404;
+        expires 5m;
+        add_header Cache-Control "public, no-cache";
+    }
+
+    # ── API + WebSocket → FastAPI ─────────────────────────────────
+    location /api/ {
         proxy_pass http://app:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        # WebSocket support
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
 
-        # Timeouts for long-running requests
         proxy_read_timeout 300s;
         proxy_connect_timeout 75s;
     }
 
+    # ── SPA fallback (client-side routing) ────────────────────────
+    location / {
+        root /usr/share/nginx/html;
+        try_files $uri $uri/ /index.html;
+        expires 5m;
+        add_header Cache-Control "public, no-cache";
+    }
+
+    # Gzip compression
     gzip on;
-    gzip_types text/plain application/json application/javascript text/css;
-    gzip_min_length 1000;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml;
+    gzip_min_length 256;
 }
 SSLCONF
 
