@@ -12,6 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field, asdict
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+import numpy as np
 import pandas as pd
 
 
@@ -84,9 +85,14 @@ class TransformedStrategy:
         [pd.DataFrame, Dict[str, Any]],
         Tuple[pd.Series, pd.Series, pd.Series, pd.Series],
     ]
-    warmup: int
-    pinescript: str
-    python_source: str
+    compute_fast: Optional[Callable[
+        [np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, Dict[str, Any]],
+        Tuple[bool, bool, bool, bool],
+    ]] = None
+    warmup: int = 50
+    pinescript: str = ""
+    python_source: str = ""
+    python_fast_source: str = ""
     settings: Dict[str, Any] = field(default_factory=dict)
 
 

@@ -202,9 +202,9 @@ class Backtester:
                        capital, fees, slippage, size, size_type, progress):
         """Magnifier with dynamic resolution and progress reporting.
 
-        Optimized: pre-allocates a window buffer DataFrame and updates the
-        last row in-place instead of creating+concatenating DataFrames per
-        sub-bar.  This eliminates ~15 allocations per HT bar.
+        Uses ``compute_fast`` (numpy-only, returns 4 bools) when available,
+        eliminating all pandas overhead from the inner loop.  Falls back to
+        the standard ``compute`` path otherwise.
         """
         mag_tf = compute_magnifier_resolution(timeframe)
         df_mag = resample_ohlcv(df_1m, mag_tf) if mag_tf != "1m" else df_1m
@@ -234,12 +234,15 @@ class Backtester:
         report_interval = max(1, total_bars // 50)
 
         # Pre-extract numpy arrays from the HT DataFrame for fast slicing
-        tf_open = df_tf["open"].values
-        tf_high = df_tf["high"].values
-        tf_low = df_tf["low"].values
-        tf_close = df_tf["close"].values
-        tf_volume = df_tf["volume"].values
-        tf_cols = ["open", "high", "low", "close", "volume"]
+        tf_open = df_tf["open"].values.astype(np.float64)
+        tf_high = df_tf["high"].values.astype(np.float64)
+        tf_low = df_tf["low"].values.astype(np.float64)
+        tf_close = df_tf["close"].values.astype(np.float64)
+        tf_volume = df_tf["volume"].values.astype(np.float64)
+
+        # Choose fast path (numpy-only) or slow path (pandas DataFrame)
+        use_fast = strategy.compute_fast is not None
+        compute_fast = strategy.compute_fast
 
         for bar_idx in range(warmup, len(tf_index)):
             # Report progress every ~2% of bars
@@ -257,69 +260,120 @@ class Backtester:
             if pos_start >= pos_end:
                 continue
 
-            # Build the window buffer once per HT bar: completed rows + 1 forming row.
-            # Use numpy to construct the data block, then wrap in a DataFrame once.
             win_start = max(0, bar_idx - window_size)
             n_completed = bar_idx - win_start
 
-            # Stack completed window data from pre-extracted arrays
-            buf = np.empty((n_completed + 1, 5), dtype=np.float64)
-            buf[:n_completed, 0] = tf_open[win_start:bar_idx]
-            buf[:n_completed, 1] = tf_high[win_start:bar_idx]
-            buf[:n_completed, 2] = tf_low[win_start:bar_idx]
-            buf[:n_completed, 3] = tf_close[win_start:bar_idx]
-            buf[:n_completed, 4] = tf_volume[win_start:bar_idx]
-
-            # Pre-fill the forming row placeholder (will be updated in inner loop)
+            # Pre-fill the forming row placeholder
             forming_open = float(mag_open[pos_start])
             forming_high = -np.inf
             forming_low = np.inf
             forming_vol = 0.0
 
-            # Build index once; we'll update the last entry in-place
-            win_idx = list(tf_index[win_start:bar_idx]) + [mag_index[pos_start]]
-            window = pd.DataFrame(buf, index=win_idx, columns=tf_cols)
+            if use_fast:
+                # ── FAST PATH: numpy-only, zero pandas overhead ──────
+                # Pre-allocate window arrays (completed + 1 forming row)
+                total_rows = n_completed + 1
+                w_open = np.empty(total_rows, dtype=np.float64)
+                w_high = np.empty(total_rows, dtype=np.float64)
+                w_low = np.empty(total_rows, dtype=np.float64)
+                w_close = np.empty(total_rows, dtype=np.float64)
+                w_volume = np.empty(total_rows, dtype=np.float64)
 
-            for pos in range(pos_start, pos_end):
-                forming_high = max(forming_high, float(mag_high[pos]))
-                forming_low = min(forming_low, float(mag_low[pos]))
-                forming_close = float(mag_close[pos])
-                forming_vol += float(mag_volume[pos])
+                # Fill completed rows
+                w_open[:n_completed] = tf_open[win_start:bar_idx]
+                w_high[:n_completed] = tf_high[win_start:bar_idx]
+                w_low[:n_completed] = tf_low[win_start:bar_idx]
+                w_close[:n_completed] = tf_close[win_start:bar_idx]
+                w_volume[:n_completed] = tf_volume[win_start:bar_idx]
 
-                # Update the last row in-place (no allocation)
-                window.iloc[-1, 0] = forming_open
-                window.iloc[-1, 1] = forming_high
-                window.iloc[-1, 2] = forming_low
-                window.iloc[-1, 3] = forming_close
-                window.iloc[-1, 4] = forming_vol
-                window.index = win_idx[:-1] + [mag_index[pos]]
+                for pos in range(pos_start, pos_end):
+                    forming_high = max(forming_high, float(mag_high[pos]))
+                    forming_low = min(forming_low, float(mag_low[pos]))
+                    forming_close = float(mag_close[pos])
+                    forming_vol += float(mag_volume[pos])
 
-                try:
-                    le, lx, se, sx = strategy.compute(window, params)
-                except Exception:
-                    continue
+                    # Update last row
+                    w_open[n_completed] = forming_open
+                    w_high[n_completed] = forming_high
+                    w_low[n_completed] = forming_low
+                    w_close[n_completed] = forming_close
+                    w_volume[n_completed] = forming_vol
 
-                last_le = bool(le.iloc[-1]) if not pd.isna(le.iloc[-1]) else False
-                last_lx = bool(lx.iloc[-1]) if not pd.isna(lx.iloc[-1]) else False
-                last_se = bool(se.iloc[-1]) if not pd.isna(se.iloc[-1]) else False
-                last_sx = bool(sx.iloc[-1]) if not pd.isna(sx.iloc[-1]) else False
+                    try:
+                        last_le, last_lx, last_se, last_sx = compute_fast(
+                            w_open, w_high, w_low, w_close, w_volume, params,
+                        )
+                    except Exception:
+                        continue
 
-                if not in_long and last_le:
-                    long_entries_mag[pos] = True
-                    in_long = True
-                    break
-                if in_long and last_lx:
-                    long_exits_mag[pos] = True
-                    in_long = False
-                    break
-                if not in_short and last_se:
-                    short_entries_mag[pos] = True
-                    in_short = True
-                    break
-                if in_short and last_sx:
-                    short_exits_mag[pos] = True
-                    in_short = False
-                    break
+                    if not in_long and last_le:
+                        long_entries_mag[pos] = True
+                        in_long = True
+                        break
+                    if in_long and last_lx:
+                        long_exits_mag[pos] = True
+                        in_long = False
+                        break
+                    if not in_short and last_se:
+                        short_entries_mag[pos] = True
+                        in_short = True
+                        break
+                    if in_short and last_sx:
+                        short_exits_mag[pos] = True
+                        in_short = False
+                        break
+            else:
+                # ── SLOW PATH: pandas DataFrame (fallback) ───────────
+                buf = np.empty((n_completed + 1, 5), dtype=np.float64)
+                buf[:n_completed, 0] = tf_open[win_start:bar_idx]
+                buf[:n_completed, 1] = tf_high[win_start:bar_idx]
+                buf[:n_completed, 2] = tf_low[win_start:bar_idx]
+                buf[:n_completed, 3] = tf_close[win_start:bar_idx]
+                buf[:n_completed, 4] = tf_volume[win_start:bar_idx]
+
+                tf_cols = ["open", "high", "low", "close", "volume"]
+                win_idx = list(tf_index[win_start:bar_idx]) + [mag_index[pos_start]]
+                window = pd.DataFrame(buf, index=win_idx, columns=tf_cols)
+
+                for pos in range(pos_start, pos_end):
+                    forming_high = max(forming_high, float(mag_high[pos]))
+                    forming_low = min(forming_low, float(mag_low[pos]))
+                    forming_close = float(mag_close[pos])
+                    forming_vol += float(mag_volume[pos])
+
+                    window.iloc[-1, 0] = forming_open
+                    window.iloc[-1, 1] = forming_high
+                    window.iloc[-1, 2] = forming_low
+                    window.iloc[-1, 3] = forming_close
+                    window.iloc[-1, 4] = forming_vol
+                    window.index = win_idx[:-1] + [mag_index[pos]]
+
+                    try:
+                        le, lx, se, sx = strategy.compute(window, params)
+                    except Exception:
+                        continue
+
+                    last_le = bool(le.iloc[-1]) if not pd.isna(le.iloc[-1]) else False
+                    last_lx = bool(lx.iloc[-1]) if not pd.isna(lx.iloc[-1]) else False
+                    last_se = bool(se.iloc[-1]) if not pd.isna(se.iloc[-1]) else False
+                    last_sx = bool(sx.iloc[-1]) if not pd.isna(sx.iloc[-1]) else False
+
+                    if not in_long and last_le:
+                        long_entries_mag[pos] = True
+                        in_long = True
+                        break
+                    if in_long and last_lx:
+                        long_exits_mag[pos] = True
+                        in_long = False
+                        break
+                    if not in_short and last_se:
+                        short_entries_mag[pos] = True
+                        in_short = True
+                        break
+                    if in_short and last_sx:
+                        short_exits_mag[pos] = True
+                        in_short = False
+                        break
 
         progress(88, "Magnifier loop complete")
 

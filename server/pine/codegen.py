@@ -118,21 +118,27 @@ class CodeGenerator:
         self._inputs: Dict[str, InputParam] = {}
         self._max_period = 0          # for warmup auto-detection
         self._signal_map: Dict[str, str] = {}  # condition_name -> signal_type
+        self._fast_mode = False       # True when emitting _compute_fast
 
     # ── public API ────────────────────────────────────────────
 
     def generate(self) -> TransformedStrategy:
         self._analyze_signals()
         python_src = self._emit_compute()
+        python_fast_src = self._emit_compute_fast()
 
         # exec() the generated code
-        from ..ta import ta  # local import to avoid circular
+        from ..ta import ta, ta_fast  # local import to avoid circular
         import pandas as pd
         import numpy as np
 
         env: Dict[str, Any] = {"ta": ta, "pd": pd, "np": np}
         exec(python_src, env)
         compute_fn = env["_compute"]
+
+        env_fast: Dict[str, Any] = {"ta": ta_fast, "np": np}
+        exec(python_fast_src, env_fast)
+        compute_fast_fn = env_fast["_compute_fast"]
 
         # Extract settings from strategy declaration
         settings = self._extract_settings()
@@ -141,9 +147,11 @@ class CodeGenerator:
             name=self._ast.strategy_decl.name if self._ast.strategy_decl else "Unnamed",
             inputs=self._inputs,
             compute=compute_fn,
+            compute_fast=compute_fast_fn,
             warmup=max(self._max_period * 3, 50),
             pinescript=self._source,
             python_source=python_src,
+            python_fast_source=python_fast_src,
             settings=settings,
         )
 
@@ -230,6 +238,76 @@ class CodeGenerator:
         self._emit_signal_return()
 
         return "\n".join(self._lines)
+
+    def _emit_compute_fast(self) -> str:
+        """Generate ``_compute_fast`` — numpy-only, returns 4 bools.
+
+        Uses ``ta`` (bound to ``ta_fast`` at exec-time) instead of pandas.
+        Input is 5 raw numpy arrays; output is 4 booleans (last-bar signals).
+        """
+        self._lines = []
+        self._indent = 0
+        self._fast_mode = True
+
+        self._emit("def _compute_fast(_open, _high, _low, _close, _volume, _p):")
+        self._indent = 1
+
+        # Derived prices (numpy arithmetic — same as pandas)
+        self._emit("_hl2 = (_high + _low) / 2.0")
+        self._emit("_hlc3 = (_high + _low + _close) / 3.0")
+        self._emit("_hlcc4 = (_high + _low + _close + _close) / 4.0")
+        self._emit("_ohlc4 = (_open + _high + _low + _close) / 4.0")
+        self._emit("")
+
+        # Inputs
+        if self._ast.inputs:
+            self._emit("# --- inputs ---")
+            for inp in self._ast.inputs:
+                self._emit(f"{inp.var_name} = _p['{inp.var_name}']")
+            self._emit("")
+
+        # Assignments (identical logic — ta_fast has the same method names)
+        if self._ast.assignments:
+            self._emit("# --- indicators / variables / signals ---")
+            for assign in self._ast.assignments:
+                self._emit_assignment(assign)
+            self._emit("")
+
+        # Build return: extract last-bar boolean from each signal array
+        self._emit("# --- return signals (last-bar bools) ---")
+        self._emit_signal_return_fast()
+
+        self._fast_mode = False
+        return "\n".join(self._lines)
+
+    def _emit_signal_return_fast(self) -> None:
+        """Emit return of 4 booleans — last element of each signal array."""
+        signals = {
+            "long_entries": None,
+            "long_exits": None,
+            "short_entries": None,
+            "short_exits": None,
+        }
+        for cond_name, signal_type in self._signal_map.items():
+            if signal_type in signals:
+                signals[signal_type] = cond_name
+
+        parts = []
+        for sig_name, cond_var in signals.items():
+            if cond_var:
+                # Extract last element; handle NaN → False
+                parts.append(
+                    f"(bool({cond_var}[-1]) if not np.isnan({cond_var}[-1]) else False)"
+                    f" if hasattr({cond_var}, '__len__') else bool({cond_var})"
+                )
+            else:
+                parts.append("False")
+
+        self._emit("return (")
+        for i, part in enumerate(parts):
+            comma = "," if i < len(parts) - 1 else ","
+            self._emit(f"    {part}{comma}")
+        self._emit(")")
 
     def _emit(self, line: str) -> None:
         prefix = "    " * self._indent
@@ -376,6 +454,8 @@ class CodeGenerator:
             if call.args:
                 inner = self._expr_to_python(call.args[0])
                 replacement = "0" if len(call.args) < 2 else self._expr_to_python(call.args[1])
+                if self._fast_mode:
+                    return f"ta.nz({inner}, {replacement})"
                 return f"({inner}).fillna({replacement})"
             return "np.nan"
 
