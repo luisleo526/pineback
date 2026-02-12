@@ -107,14 +107,15 @@ class Backtester:
 
         # Order sizing for vectorbt
         # Note: SizeType.Percent does not support position reversal (long->short).
-        # Use np.inf with "amount" for all-in sizing, which is equivalent but
-        # compatible with strategies that have both long and short signals.
+        # Use np.inf with "amount" for all-in sizing, and "value" for partial
+        # equity, which are both compatible with strategies that have both long
+        # and short signals (e.g. SuperTrend).
         if order_type == "percent" and order_size >= 100:
             _size = np.inf        # all available cash
             _size_type = "amount"
         elif order_type == "percent":
-            _size = order_size / 100.0
-            _size_type = "percent"
+            _size = capital * (order_size / 100.0)
+            _size_type = "value"
         else:
             _size = order_size
             _size_type = "amount"
