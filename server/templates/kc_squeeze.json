@@ -20,7 +20,7 @@
             {
               "id": "c_le1a",
               "left": { "type": "variable", "variableId": "var_myBBW" },
-              "operator": "lt",
+              "operator": "gt",
               "right": { "type": "variable", "variableId": "var_myKCW" }
             },
             {
@@ -60,7 +60,7 @@
             {
               "id": "c_se1a",
               "left": { "type": "variable", "variableId": "var_myBBW" },
-              "operator": "lt",
+              "operator": "gt",
               "right": { "type": "variable", "variableId": "var_myKCW" }
             },
             {

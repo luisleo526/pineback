@@ -104,7 +104,7 @@
       "id": "input_overbought",
       "name": "overbought",
       "type": "int",
-      "default": 70,
+      "default": 65,
       "min": 50,
       "max": 100
     },
@@ -112,7 +112,7 @@
       "id": "input_oversold",
       "name": "oversold",
       "type": "int",
-      "default": 30,
+      "default": 35,
       "min": 0,
       "max": 50
     }

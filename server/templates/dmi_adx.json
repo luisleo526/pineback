@@ -168,7 +168,7 @@
       "id": "input_adxThreshold",
       "name": "adxThreshold",
       "type": "int",
-      "default": 25,
+      "default": 20,
       "min": 1
     }
   ]
