@@ -7,6 +7,7 @@
 import { onMounted, onUnmounted, watch } from 'vue'
 import Shepherd from 'shepherd.js'
 import 'shepherd.js/dist/css/shepherd.css'
+import { useUIScale } from '../composables/useUIScale'
 
 const props = defineProps({
   active: { type: Boolean, default: false },
@@ -15,6 +16,8 @@ const props = defineProps({
 const emit = defineEmits(['load-template', 'tour-complete', 'start-tour', 'open-backtest'])
 
 let tour = null
+const { scale } = useUIScale()
+let _savedScale = null   // stash the user's zoom while the tour is active
 
 // ─────────────────────────────────────────────────────────────
 // Multi-element spotlight: patch the SVG overlay to cut extra
@@ -325,18 +328,21 @@ function createTour() {
     when: _multiSpotlight(['[data-tab="variables"]']),
   })
 
-  // Step 8: Click Backtest button in the header (action)
-  // Button is in the top-right header → tooltip below.
+  // Step 8: Open the Backtest panel.
+  // The button toggles the panel, so we can't rely on advanceOn click —
+  // if the panel is already open, clicking would close it and steps 9-11
+  // would fail. Instead, programmatically open the panel and advance.
   tour.addStep({
     id: 'click-backtest',
     title: 'Backtest Configuration',
     text: `
-      <p>Click the <strong>"Backtest"</strong> button to open the configuration panel.</p>
-      <p class="text-xs opacity-40 mt-2">Step 8 of 12 · Click to continue</p>
+      <p>This is the <strong>Backtest</strong> button — it opens the configuration panel where you set timeframes, dates, and run backtests.</p>
+      <p class="text-xs opacity-40 mt-2">Step 8 of 12</p>
     `,
     attachTo: { element: '[data-tab="backtest"]', on: 'bottom' },
-    advanceOn: { selector: '[data-tab="backtest"]', event: 'click' },
-    buttons: [],
+    buttons: [
+      { text: 'Open Panel →', action() { emit('open-backtest'); tour.next() }, classes: 'shepherd-button-primary' },
+    ],
   })
 
   // ── Steps 9-11 live inside the backtest config panel.
@@ -431,20 +437,37 @@ function createTour() {
 
   tour.on('complete', () => {
     _stopExtraCutoutSync()
+    _restoreZoomAfterTour()
     localStorage.setItem('tour_completed', 'true')
     emit('tour-complete')
   })
 
   tour.on('cancel', () => {
     _stopExtraCutoutSync()
+    _restoreZoomAfterTour()
     localStorage.setItem('tour_completed', 'true')
   })
+}
+
+function _resetZoomForTour() {
+  if (scale.value !== 1) {
+    _savedScale = scale.value
+    scale.value = 1
+  }
+}
+
+function _restoreZoomAfterTour() {
+  if (_savedScale !== null) {
+    scale.value = _savedScale
+    _savedScale = null
+  }
 }
 
 function startTour() {
   if (tour) {
     tour.cancel()
   }
+  _resetZoomForTour()
   createTour()
   tour.start()
 }
@@ -466,6 +489,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   _stopExtraCutoutSync()
+  _restoreZoomAfterTour()
   if (tour) {
     tour.cancel()
     tour = null
