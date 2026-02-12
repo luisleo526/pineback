@@ -199,3 +199,26 @@ async def list_backtests(db: Session = Depends(get_db)):
         .all()
     )
     return [j.to_summary_dict() for j in jobs]
+
+
+@router.delete("/{backtest_id}", status_code=204)
+async def delete_backtest(backtest_id: str, db: Session = Depends(get_db)):
+    """Delete a single backtest by ID."""
+    job = db.query(Backtest).filter(Backtest.id == backtest_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Backtest not found")
+    db.delete(job)
+    db.commit()
+
+
+@router.delete("", status_code=200)
+async def delete_backtests_by_status(
+    status: str = "failed",
+    db: Session = Depends(get_db),
+):
+    """Delete all backtests matching a status. Defaults to 'failed'."""
+    if status not in ("failed", "completed", "pending"):
+        raise HTTPException(status_code=400, detail="Invalid status filter")
+    count = db.query(Backtest).filter(Backtest.status == status).delete()
+    db.commit()
+    return {"deleted": count}
